@@ -113,7 +113,7 @@ function HeroStaticText() {
       </Reveal>
 
       <Reveal variant="zoom-in" delay={400}>
-        <p className="text-sm md:text-[1rem] leading-[2rem] text-[#BDC0C2] font-light max-w-[27.375rem] sm:max-w-[22.875rem] md:max-w-[24.875rem] transition-all">
+        <p className="text-sm md:text-[1rem] leading-[2rem] text-[#BDC0C2] font-light max-w-[27.375rem] sm:max-w-[22.875rem] md:max-w-[24.875rem] transition-text">
           Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with
           comfortable padded earphones, delivering first-rate playback.
         </p>
@@ -203,7 +203,7 @@ function HeroPinnedText({ runwayProgress }: { runwayProgress: MotionValue<number
         <motion.p
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1, transition: { duration: 0.5, delay: 0.5, ease: AOS_DEFAULT_EASE } }}
-          className="text-sm md:text-[1rem] leading-[2rem] text-[#BDC0C2] font-light max-w-[27.375rem] sm:max-w-[22.875rem] md:max-w-[24.875rem] transition-all"
+          className="text-sm md:text-[1rem] leading-[2rem] text-[#BDC0C2] font-light max-w-[27.375rem] sm:max-w-[22.875rem] md:max-w-[24.875rem] transition-text"
         >
           Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with
           comfortable padded earphones, delivering first-rate playback.
