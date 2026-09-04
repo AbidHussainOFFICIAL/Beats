@@ -43,16 +43,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // "scroll-smooth" (Tailwind's `scroll-behavior: smooth`) removed —
-    // Lenis now owns scroll easing exclusively. Leaving native smooth-
-    // scroll active alongside Lenis makes the two fight over the same
-    // scroll position on every anchor-link jump (a native instant-ish CSS
-    // animation competing with Lenis's own rAF-driven one), which reads as
-    // janky/stuttery instead of smooth. See globals.css for the matching
-    // removal of the same rule there, and LenisProvider.tsx for how anchor
-    // links now get their smoothing from Lenis directly instead.
-    <html lang="en" className={`max-w-full sm:max-w-none overflow-x-hidden sm:overflow-x-visible ${poppins.variable}`}>
-      <body className="relative light antialiase bg-[#0F0F10] font-poppins text-white overflow-x-hidden">
+    // "overflow-x-clip" (not "-hidden") on both html and body: CSS spec
+    // requires that if overflow-x is anything other than `visible` while
+    // overflow-y is left unset, the browser silently upgrades that unset
+    // `visible` into `auto` — turning body into an accidental VERTICAL
+    // clipping box too. That clipped away anything positioned above y=0,
+    // which is exactly where Reveal's hidden-state transform (e.g.
+    // fade-down's translateY(-100px)) put Header's logo/nav before they'd
+    // animated in — so they were being clipped out of existence before
+    // IntersectionObserver ever got a chance to detect them as visible.
+    // `clip` gives the identical horizontal-bleed protection this was
+    // originally added for (Case's image, Hero's desktop headphone) but is
+    // specifically exempt from that cross-axis upgrade rule, so overflow-y
+    // stays genuinely `visible` — no accidental clipping box, on any
+    // screen size. (Needs a reasonably modern browser — Safari 16+/
+    // Firefox 102+/Chrome 90+ — unlike `hidden`, which has no such floor;
+    // fine for this stack.)
+    <html lang="en" className={`max-w-full sm:max-w-none overflow-x-clip sm:overflow-x-visible ${poppins.variable}`}>
+      <body className="relative light antialiase bg-[#0F0F10] font-poppins text-white overflow-x-clip">
         <LenisProvider>
           <MouseLightEffect />
           {children}
