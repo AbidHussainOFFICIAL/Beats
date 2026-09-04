@@ -36,11 +36,13 @@ import { HERO_RUNWAY_HEIGHT_VH } from "@/lib/constants";
  * it stays completely still through all three phases, then begins its
  * upward drift once the user continues scrolling past the pinned sequence.
  *
- * MOBILE / REDUCED MOTION: this entire mechanism is gated behind
- * `usePinnedSequence` (desktop width AND no reduced-motion preference). When
- * false, the ORIGINAL static/Reveal-based hero renders — unchanged from
- * before this update. This is a hard JS branch, not just responsive CSS, so
- * mobile's behavior is guaranteed identical to what it was previously.
+ * MOBILE / TABLET / REDUCED MOTION: this entire pinned mechanism is gated
+ * behind `usePinnedSequence` (desktop width AND no reduced-motion
+ * preference). When false, the STATIC hero renders instead — see
+ * HeroHeadphoneImage/HeroStaticText below, which now render a genuinely
+ * different, non-overlapping layout below `lg` rather than reusing
+ * desktop's absolute-positioned image at a "zero width" wrapper (see the
+ * comment on HeroHeadphoneImage for why that mattered).
  *
  * "On ear" / Beats 3 SPACING NOTE: the "On ear" heading carries a clip-path
  * mask + webkit gradient-text effect (see globals.css .aos-animation and the
@@ -60,66 +62,92 @@ const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0
 
 function HeroHeadphoneImage({ parallaxStartAfterPx }: { parallaxStartAfterPx?: number }) {
   return (
-    <div className="w-0 lg:w-full transition-[width]">
-      <div className="absolute top-0 -right-40 lg:left-40 transform -translate-y-[25rem] md:-translate-y-[29rem] lg:-translate-y-[31rem] -translate-x-[34vw] lg:-translate-x-[5.6875rem] w-[15.9375rem] md:w-[18.75rem] z-0 transition-[width]">
-        {/* Mobile: fades in, no parallax drift (parallax was desktop-only via .headphones) */}
-        <Reveal variant="fade-down" duration={700} delay={200} className="lg:hidden">
+    <>
+      {/* Mobile / tablet (<lg): a plain, centered, in-flow image with a
+          simple fade-in — no absolute bleed positioning and no parallax
+          drift.
+          Previously this component rendered ONE wrapping div for every
+          screen size, switching only the image's own Reveal variant
+          (fade-down vs. the desktop parallax version) between mobile and
+          desktop, while the OUTER wrapper stayed `position: absolute` at
+          every width (with a "w-0 lg:w-full" trick meant to keep its
+          in-flow footprint at zero below lg). That trick only zeroed out
+          the wrapper's own contribution to the flex layout — it did
+          nothing to the image itself, since `position: absolute` escapes
+          its parent's box size entirely and paints at full size regardless.
+          The result: the image painted directly on top of the hero text on
+          every screen below `lg`, which is what made mobile feel cluttered.
+          Splitting into two fully separate blocks below — each genuinely
+          absent (not just zero-width) outside its own breakpoint — removes
+          that overlap entirely instead of just shrinking it. */}
+      <div className="flex justify-center mb-8 sm:mb-10 lg:hidden">
+        <Reveal variant="fade-down" duration={700} delay={100} className="w-[10.5rem] sm:w-[13rem]">
           <img src="/images/content/header-headphone-bkg.png" role="presentation" alt="" className="w-full" />
         </Reveal>
-        <Reveal variant="fade-down" duration={700} delay={200} className="hidden lg:block">
-          <ParallaxImage
-            src="/images/content/header-headphone-bkg.png"
-            alt=""
-            direction="up"
-            distance={240}
-            springStiffness={220}
-            scrollRangePx={500}
-            startAfterPx={parallaxStartAfterPx}
-            wrapperClassName="headphones w-full"
-            className="w-full"
-          />
-        </Reveal>
       </div>
-    </div>
+
+      {/* Desktop (lg+): original absolute, bled, parallax-drifting image — unchanged. */}
+      <div className="hidden lg:block lg:w-full transition-[width]">
+        <div className="absolute top-0 left-40 transform -translate-y-[31rem] -translate-x-[5.6875rem] w-[18.75rem] z-0">
+          <Reveal variant="fade-down" duration={700} delay={200}>
+            <ParallaxImage
+              src="/images/content/header-headphone-bkg.png"
+              alt=""
+              direction="up"
+              distance={240}
+              springStiffness={220}
+              scrollRangePx={500}
+              startAfterPx={parallaxStartAfterPx}
+              wrapperClassName="headphones w-full"
+              className="w-full"
+            />
+          </Reveal>
+        </div>
+      </div>
+    </>
   );
 }
 
-/** Original, unchanged, non-pinned hero text — used for mobile AND as the
- * reduced-motion fallback on desktop. */
+/** Original, unchanged, non-pinned hero text — used for mobile/tablet AND
+ * as the reduced-motion fallback on desktop. Now centers itself below `lg`
+ * (matching HeroHeadphoneImage's stacked mobile layout above it) and stays
+ * left-aligned at `lg`+, exactly as before. */
 function HeroStaticText() {
   return (
-    <div className="relative w-full">
+    <div className="relative w-full text-center lg:text-left">
       <AnimatedHeading
         as="h1"
-        className="text-[5rem] md:text-[7.5rem] font-semibold leading-[6rem] pl-[0.9375rem] md:pl-12"
+        className="text-[3.5rem] sm:text-[5rem] md:text-[6rem] lg:text-[7.5rem] font-semibold leading-[4.25rem] sm:leading-[6rem] md:leading-[6.5rem] lg:leading-[6rem] pl-0 lg:pl-12"
         letters={[
           { char: "O", delay: 0 },
-          { char: "n", delay: 50, className: "-ml-[0.125rem] md:-ml-[0.25rem]" },
+          { char: "n", delay: 50, className: "-ml-[0.0625rem] sm:-ml-[0.125rem] lg:-ml-[0.25rem]" },
           { char: "\u00a0", delay: 50 },
-          { char: "e", delay: 100, className: "-ml-[0.5rem] md:-ml-[1rem]" },
-          { char: "a", delay: 150, className: "-ml-[0.125rem] md:-ml-[0.25rem]" },
-          { char: "r", delay: 150, className: "-ml-[0.125rem] md:-ml-[0.25rem]" },
+          { char: "e", delay: 100, className: "-ml-[0.3125rem] sm:-ml-[0.5rem] lg:-ml-[1rem]" },
+          { char: "a", delay: 150, className: "-ml-[0.0625rem] sm:-ml-[0.125rem] lg:-ml-[0.25rem]" },
+          { char: "r", delay: 150, className: "-ml-[0.0625rem] sm:-ml-[0.125rem] lg:-ml-[0.25rem]" },
         ]}
       />
 
       <Reveal variant="zoom-in" delay={300}>
-        <h4 className="text-[2.5rem] md:text-[4rem] font-semibold leading-[1.40625rem] mt-4 md:mt-16 transition-text">
+        <h4 className="text-[2rem] sm:text-[2.5rem] lg:text-[4rem] font-semibold leading-[1.40625rem] mt-6 sm:mt-8 lg:mt-16 transition-text">
           Beats 3
         </h4>
       </Reveal>
 
       <Reveal variant="zoom-in" delay={350}>
-        <p className="text-lg md:text-xl font-semibold mt-[3.125rem] mb-5 transition-text">Overview</p>
+        <p className="text-base sm:text-lg lg:text-xl font-semibold mt-8 sm:mt-10 lg:mt-[3.125rem] mb-4 sm:mb-5 transition-text">
+          Overview
+        </p>
       </Reveal>
 
       <Reveal variant="zoom-in" delay={400}>
-        <p className="text-sm md:text-[1rem] leading-[2rem] text-[#BDC0C2] font-light max-w-[27.375rem] sm:max-w-[22.875rem] md:max-w-[24.875rem] transition-text">
+        <p className="text-sm lg:text-[1rem] leading-[1.75rem] lg:leading-[2rem] text-[#BDC0C2] font-light max-w-[21rem] sm:max-w-[24rem] lg:max-w-[24.875rem] mx-auto lg:mx-0 transition-text">
           Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with
           comfortable padded earphones, delivering first-rate playback.
         </p>
       </Reveal>
 
-      <div className="mt-[3.4375rem]">
+      <div className="flex justify-center lg:block mt-8 sm:mt-10 lg:mt-[3.4375rem]">
         <Reveal variant="zoom-in" delay={450} className="inline-block">
           <button
             type="button"
@@ -283,7 +311,7 @@ export default function Hero() {
 
   return (
     <section className="px-6">
-      <div className="relative flex max-w-[60.0625rem] mx-auto">
+      <div className="relative flex flex-col items-center lg:flex-row lg:items-stretch max-w-[60.0625rem] mx-auto">
         <HeroHeadphoneImage />
         <HeroStaticText />
       </div>

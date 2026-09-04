@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
-import { LogoIcon, MenuIcon, ShopArrowIcon } from "@/components/icons";
+import MobileNav from "@/components/layout/MobileNav";
+import { LogoIcon, ShopArrowIcon } from "@/components/icons";
 import { navLinks } from "@/lib/data";
 
 /**
@@ -21,7 +22,12 @@ const HEADER_STICKY_VH = 140;
 export default function Header() {
   return (
     <div style={{ height: `${HEADER_STICKY_VH}vh`, marginBottom: `-${HEADER_STICKY_VH}vh` }}>
-      <header id="home" className="sticky top-0 z-30">
+      {/* z-50 (raised from the original z-30): MobileNav's full-screen panel
+          portals straight to <body> and needs Header — specifically the
+          toggle button that lives inside it — to sit above that panel's own
+          z-40, so the button stays visible/clickable as an X while the menu
+          is open. See MobileNav.tsx for the full stacking-context reasoning. */}
+      <header id="home" className="sticky top-0 z-50">
         <nav className="relative flex justify-end max-w-[70.8125rem] mx-auto">
           <ul className="absolute top-0 left-0 w-full flex justify-between px-6 pt-9 z-20">
             <li>
@@ -34,11 +40,9 @@ export default function Header() {
                 </Link>
               </Reveal>
             </li>
-            <li className="lg:translate-x-32 xl:hidden transition-transform duration-700">
+            <li className="lg:hidden">
               <Reveal variant="fade-down" duration={700}>
-                <a href="#" aria-label="Open menu" className="opacity-100 lg:opacity-0 transition-opacity duration-700">
-                  <MenuIcon />
-                </a>
+                <MobileNav />
               </Reveal>
             </li>
           </ul>

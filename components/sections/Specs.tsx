@@ -20,7 +20,7 @@ export default function Specs() {
   const { ref, inView } = useAosReveal<HTMLUListElement>({ offset: 300 });
 
   return (
-    <section id="specs" className="pl-6 mt-[4rem] lg:mt-[8.5rem] transition-[margin]">
+    <section id="specs" className="px-6 mt-[4rem] lg:mt-[8.5rem] transition-[margin]">
       <AnimatedHeading
         as="h2"
         className="text-center text-[3.5rem] md:text-[4.5rem]"
@@ -32,8 +32,15 @@ export default function Specs() {
         }))}
       />
 
-      <div className="flex justify-between mt-[3.875rem] max-w-[31.25rem] mx-auto">
-        <div className="min-w-[11.25rem]">
+      {/* Below sm this was previously a fixed-width flex row (icon list
+          min-w-[11.25rem] + image container, side by side) inside a
+          section that only had LEFT padding (pl-6, no pr-6) — the combined
+          widths didn't fit a phone-width viewport, and the missing right
+          padding meant content could sit flush against the screen edge.
+          Below sm it now stacks vertically and centers instead; sm+ is
+          untouched from the original side-by-side layout. */}
+      <div className="flex flex-col items-center gap-10 sm:flex-row sm:items-center sm:justify-between sm:gap-0 mt-[3.875rem] max-w-[31.25rem] mx-auto">
+        <div className="w-full max-w-[13rem] sm:max-w-none sm:min-w-[11.25rem] sm:w-auto">
           <ul ref={ref} className="space-y-7">
             {specs.map((spec) => (
               <li
@@ -73,8 +80,8 @@ export default function Specs() {
             ))}
           </ul>
         </div>
-        <div className="flex items-center">
-          <div className="max-w-[15.625rem] md:max-w-[18.75rem] transform translate-x-8 mb-5 transition-[max-width]">
+        <div className="flex items-center justify-center sm:justify-start">
+          <div className="max-w-[12.5rem] sm:max-w-[15.625rem] md:max-w-[18.75rem] sm:transform sm:translate-x-8 mb-0 sm:mb-5 transition-[max-width]">
             <ScrollRevealImage
               src="/images/content/specs-headphones-bkg.png"
               alt="black headphones"

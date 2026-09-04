@@ -7,7 +7,7 @@ const CASE_LETTERS = ["C", "a", "s", "e"];
 
 export default function Case() {
   return (
-    <section id="case" className="mt-[5.75rem] lg:mt-[11.75rem] transition-[margin]">
+    <section id="case" className="px-6 mt-[5.75rem] lg:mt-[11.75rem] transition-[margin]">
       <AnimatedHeading
         as="h2"
         className="text-center text-[3.5rem] md:text-[4.5rem]"
@@ -16,8 +16,14 @@ export default function Case() {
       />
 
       <div className="flex justify-between mt-[3.875rem] max-w-[32.4375rem] md:max-w-[37.25rem] mx-auto">
-        <div className="flex items-center min-w-[8.125rem]">
-          <div className="max-w-[15.625rem] md:max-w-[18.75rem] -translate-x-12 transition-[max-width]">
+        <div className="flex items-center min-w-[5rem] sm:min-w-[8.125rem]">
+          {/* Section previously had no horizontal padding at all, so on
+              narrow screens this column pair (min-widths ~362px combined)
+              relied entirely on the page's overflow-x-hidden to clip the
+              overflow rather than actually fitting. Adding px-6 above and
+              scaling these min/max-widths down below sm means it now really
+              fits instead of just getting silently cropped. */}
+          <div className="max-w-[9rem] sm:max-w-[15.625rem] md:max-w-[18.75rem] -translate-x-4 sm:-translate-x-12 transition-[max-width]">
             <ScrollRevealImage
               src="/images/content/case-headphone-case-bkg.png"
               alt="headphone case"
@@ -28,7 +34,7 @@ export default function Case() {
             />
           </div>
         </div>
-        <div className="flex flex-col justify-end md:justify-center pr-6 min-w-[14.5rem] w-[14.5rem] md:min-w-[16.5rem] md:w-[16.5rem]">
+        <div className="flex flex-col justify-end md:justify-center pr-0 sm:pr-6 min-w-[10.5rem] w-[10.5rem] sm:min-w-[14.5rem] sm:w-[14.5rem] md:min-w-[16.5rem] md:w-[16.5rem]">
           <Reveal variant="fade-up" duration={700} delay={50} offset={300}>
             <p className="text-[#BDC0C2] text-[0.9375rem] md:text-[1rem] leading-[2rem] font-light transition-text">
               With a comfortable and adaptable case so that you can store it whenever you want, and keep your

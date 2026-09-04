@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import MouseLightEffect from "@/components/ui/MouseLightEffect";
+import LenisProvider from "@/components/providers/LenisProvider";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -42,10 +43,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`scroll-smooth max-w-full sm:max-w-none overflow-x-hidden sm:overflow-x-visible ${poppins.variable}`}>
+    // "scroll-smooth" (Tailwind's `scroll-behavior: smooth`) removed —
+    // Lenis now owns scroll easing exclusively. Leaving native smooth-
+    // scroll active alongside Lenis makes the two fight over the same
+    // scroll position on every anchor-link jump (a native instant-ish CSS
+    // animation competing with Lenis's own rAF-driven one), which reads as
+    // janky/stuttery instead of smooth. See globals.css for the matching
+    // removal of the same rule there, and LenisProvider.tsx for how anchor
+    // links now get their smoothing from Lenis directly instead.
+    <html lang="en" className={`max-w-full sm:max-w-none overflow-x-hidden sm:overflow-x-visible ${poppins.variable}`}>
       <body className="relative light antialiase bg-[#0F0F10] font-poppins text-white overflow-x-hidden">
-        <MouseLightEffect />
-        {children}
+        <LenisProvider>
+          <MouseLightEffect />
+          {children}
+        </LenisProvider>
       </body>
     </html>
   );

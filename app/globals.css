@@ -2,8 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+/*
+  `html { scroll-behavior: smooth; }` removed from here — Lenis now owns
+  scroll easing exclusively (see LenisProvider.tsx). Native smooth-scroll
+  left active alongside Lenis's own rAF-driven smoothing makes both systems
+  fight over the same scroll position on every anchor-link jump, which
+  reads as janky/stuttery rather than smooth. The Tailwind "scroll-smooth"
+  class that used to sit on the <html> tag in layout.tsx was removed for
+  the exact same reason.
+*/
+
+/*
+  Lenis's own required/recommended CSS (from Lenis's docs), lightly
+  commented for what each rule actually does:
+*/
+
+/* Lenis measures/animates scroll on the real <html>/<body> box — if either
+   ever gets an explicit height elsewhere that conflicts with content
+   height, this keeps them sized to their content as expected. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+/* Lenis adds this class while an eased scroll is in progress (including
+   the `scrollTo` calls LenisProvider makes for anchor links). Forcing
+   `scroll-behavior: auto` here stops the BROWSER's own native smooth-
+   scroll from ever kicking in mid-animation and fighting Lenis's — this
+   is the belt-and-suspenders version of removing the global rule above. */
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Any element marked `data-lenis-prevent` (see MobileNav.tsx's full-screen
+   overlay, which needs native `overflow-y-auto` scrolling of its own
+   rather than having Lenis try to smooth-scroll the page behind it) gets
+   `overscroll-behavior: contain` so a scroll that reaches the top/bottom
+   of that element doesn't "leak" into scrolling the page underneath it. */
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Lenis adds this class when explicitly paused via `lenis.stop()` (used
+   by MobileNav while its overlay is open) — hides any residual native
+   scrollbar/scroll affordance while scroll is intentionally frozen. */
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Iframes swallow wheel/touch events before Lenis ever sees them, which
+   can make scrolling feel like it randomly stops working the moment the
+   cursor crosses one. Not currently used anywhere in this app, but this
+   is Lenis's own standard recommended safeguard, included for when one
+   ever is added. */
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 *,

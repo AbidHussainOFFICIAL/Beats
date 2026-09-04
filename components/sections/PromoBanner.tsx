@@ -35,7 +35,24 @@ export default function PromoBanner() {
             </div>
           </div>
           <div>
-            <div className="absolute 593:static -bottom-[2.9375rem] -right-[9.0625rem] w-[18.75rem] md:w-[21.875rem] z-0 transition-[width]">
+            {/*
+              Restored the original `593:static` toggle: at 593px and above
+              (every width from small tablets through desktop) this needs
+              to be `static` — normal in-flow layout, sitting next to the
+              text as a flex sibling — which is what actually keeps it
+              contained inside the card instead of bleeding off the edge
+              of the page. A previous version made this `absolute` at
+              every width to fix a mobile scroll issue, but that also
+              broke this desktop-and-up containment (the image bled off
+              the right side of the whole viewport once nothing switched
+              it back to static).
+              The real, narrower problem was only ever the sub-593px case:
+              absolute positioning + the full 300px desktop width + the
+              full -9.0625rem offset, all applied uniformly down to small
+              phones. That's what's actually scaled down below — width
+              and offset only, position mode is back to the original.
+            */}
+            <div className="absolute -bottom-4 -right-6 593:static w-[9.5rem] 593:w-[18.75rem] md:w-[21.875rem] z-0 transition-[width]">
               <ParallaxImage
                 src="/images/content/sale-headphones-collapse-bkg.png"
                 alt="collapsed headphones"

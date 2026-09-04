@@ -8,7 +8,14 @@ export default function Footer() {
   return (
     <footer className="relative mt-[5.75rem] px-6 lg:mt-[11.75rem] transition-[margin] z-30">
       <div className="flex flex-col md:flex-row md:space-x-20 lg:space-x-40 max-w-[70.8125rem] mx-auto">
-        <div className="flex-1 flex md:justify-between">
+        {/* justify-between now applies at every width, not just md+: on
+            mobile the logo column is hidden entirely (display: none is
+            excluded from flex layout), so this becomes a clean two-column
+            Products/Support row with the two lists pushed to opposite
+            edges — instead of the previous mobile behavior, which relied on
+            a small mr-6 gap and left both lists bunched together on the
+            left. */}
+        <div className="flex-1 flex justify-between">
           <div className="hidden md:block">
             <Reveal variant="fade-right" duration={700} anchorPlacement="top-bottom">
               <Link href="/" className="logo mt-2 inline-block transform scale-[0.75] text-white transition-transform">
@@ -17,7 +24,7 @@ export default function Footer() {
             </Reveal>
           </div>
 
-          <div className="mr-6 md:mr-0">
+          <div>
             <Reveal variant="fade-up" duration={700} delay={50} anchorPlacement="top-bottom">
               <h5 className="font-semibold text-xl mb-4">Products</h5>
             </Reveal>
@@ -52,7 +59,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex-1 mt-5 md:mt-0">
+        <div className="flex-1 mt-10 md:mt-0">
           <Reveal variant="fade-left" duration={700} delay={100} anchorPlacement="top-bottom">
             <SubscribeForm />
           </Reveal>

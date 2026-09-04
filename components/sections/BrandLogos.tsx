@@ -15,7 +15,10 @@ export default function BrandLogos() {
           {brandLogos.map((brand) => (
             <li key={brand.name} className="transform hover:scale-90 transition-transform duration-700">
               <Reveal variant="fade-left" duration={700} delay={brand.delay} offset={150}>
-                <a href="#" className="block max-w-[5.625rem] sm:max-w-[6.25rem] hover:opacity-75 transition-opacity">
+                <a
+                  href="#"
+                  className="block max-w-[4.5rem] sm:max-w-[5.625rem] md:max-w-[6.25rem] hover:opacity-75 transition-opacity"
+                >
                   <img src={brand.src} alt={brand.name} className="w-full cursor-pointer" />
                 </a>
               </Reveal>

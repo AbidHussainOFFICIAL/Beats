@@ -24,7 +24,7 @@ export default function Products() {
   const { ref, inView } = useAosReveal<HTMLHeadingElement>({ offset: 300 });
 
   return (
-    <section id="products" className="mt-[5.75rem] px-3 lg:mt-[11.75rem] transition-[margin]">
+    <section id="products" className="mt-[5.75rem] px-6 sm:px-3 lg:mt-[11.75rem] transition-[margin]">
       <h2 ref={ref} className="aos-animation text-center text-[3.5rem] md:text-[4.5rem] transition-text">
         <span>
           <LetterRow letters={CHOOSE_LETTERS} inView={inView} />
@@ -35,7 +35,17 @@ export default function Products() {
         </span>
       </h2>
 
-      <div className="flex flex-wrap justify-between mx-auto max-w-[23.25rem] lg:max-w-[35.25rem] mt-2.5 lg:mt-[2.625rem] transition-[max-width]">
+      {/*
+        Previously a fixed two-column flex-wrap at every width — two
+        10.125rem (162px) cards plus their gap don't fit inside a
+        320–375px viewport's content width, and even where they barely
+        did, the card was too narrow for the longest product name
+        ("Twilight Grey") to sit next to the add-to-bag button without
+        wrapping awkwardly. Below sm this is now a single, wider,
+        centered column instead — sm+ is the untouched original
+        multi-column wrap layout, which had enough room already.
+      */}
+      <div className="flex flex-col items-center gap-6 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-0 mx-auto max-w-[14rem] sm:max-w-[23.25rem] lg:max-w-[35.25rem] mt-6 sm:mt-2.5 lg:mt-[2.625rem] transition-[max-width]">
         {products.map((product) => (
           <Reveal
             key={product.name}
@@ -43,7 +53,7 @@ export default function Products() {
             duration={700}
             delay={product.delay}
             offset={300}
-            className="flex flex-col justify-end bg-[#181A1B] px-2 py-2 rounded-lg h-[9.5rem] w-[10.125rem] mt-[6.25rem] group"
+            className="flex flex-col justify-end bg-[#181A1B] px-2 py-2 rounded-lg h-[9.5rem] w-[14rem] sm:w-[10.125rem] sm:mt-[6.25rem] group"
           >
             <div className="flex justify-center">
               <div className="w-[5.9375rem] mb-6 group-hover:-translate-y-10 transform transition-transform duration-1000">
@@ -67,8 +77,10 @@ export default function Products() {
             </div>
           </Reveal>
         ))}
-        {/* Spacer to preserve the original's flex-wrap balance on the last row */}
-        <div className="h-[9.5rem] w-[10.125rem] mt-[6.25rem]" />
+        {/* Spacer to preserve the original's flex-wrap balance on the last
+            row — only relevant to the sm+ multi-column layout; mobile's
+            single centered column doesn't need it. */}
+        <div className="hidden sm:block h-[9.5rem] w-[10.125rem] sm:mt-[6.25rem]" />
       </div>
     </section>
   );

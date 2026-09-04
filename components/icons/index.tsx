@@ -19,6 +19,19 @@ export function MenuIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/**
+ * Companion to MenuIcon — same 18x18 box, drawn as a plain X — used by
+ * MobileNav to cross-fade the hamburger into a close affordance when the
+ * mobile menu is open.
+ */
+export function CloseIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M1.5 1.5 16.5 16.5M16.5 1.5 1.5 16.5" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function ShopArrowIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
