@@ -80,7 +80,18 @@ export default function Footer() {
             </div>
 
             <div className="transform hover:-translate-y-1 transition-transform duration-700">
-              <Reveal variant="fade-left" duration={700} delay={350} anchorPlacement="top-bottom">
+              {/* fade-left → fade-up: fade-left's hidden state shifts the
+                  element +100px to the right, which on a narrow mobile
+                  viewport pushed it past body's clipped edge (see
+                  layout.tsx's overflow-x-clip) — it was being clipped out
+                  of existence before it could ever animate in, the same
+                  category of bug Header's logo had (there it was a
+                  vertical clip; here it's the horizontal one that clip/
+                  hidden was always doing on purpose). fade-up doesn't
+                  shift horizontally at all, so it's immune to that clip,
+                  and it now matches the social icons' own variant/timing
+                  so the whole row appears together as one group. */}
+              <Reveal variant="fade-up" duration={700} delay={350} anchorPlacement="top-bottom">
                 <a
                   href="#home"
                   aria-label="Back to top"

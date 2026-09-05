@@ -13,6 +13,20 @@
 */
 
 /*
+  This site is always dark (no light-mode toggle), so tell the browser
+  that once, globally, rather than per-element. `color-scheme: dark` makes
+  Chrome/Firefox render their own NATIVE UI — autofill/saved-address
+  dropdowns, date/time pickers, the default scrollbar — in a dark variant
+  automatically. This can't reach in and set exact brand colors (native
+  autofill UI is rendered entirely outside the page's DOM specifically so
+  a page can't spoof it), but it stops it from being a jarring white popup
+  on a dark page, which is the actual visible problem.
+*/
+html {
+  color-scheme: dark;
+}
+
+/*
   Lenis's own required/recommended CSS (from Lenis's docs), lightly
   commented for what each rule actually does:
 */
@@ -57,6 +71,35 @@ html.lenis body {
    ever is added. */
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/*
+  Chrome draws its own blue border/background on a field with an active
+  native autofill suggestion, entirely separate from our `focus:` CSS —
+  same category as the autofill dropdown itself (browser-native UI, not
+  page-stylable in the general case). This is the standard, well-known
+  workaround specifically for the `:-webkit-autofill` pseudo-state: it CAN
+  be overridden, just not through a normal border/background declaration
+  (Chrome ignores those) — only through this box-shadow-inset trick, which
+  visually repaints the field's interior in our own colors instead.
+  Scoped to the mobile subscribe popover's input specifically, since that's
+  the only bordered/boxed input in the app (the desktop bar's input is
+  borderless/transparent, so this cosmetic issue doesn't apply there).
+  Kept as a defensive fallback alongside SubscribeForm.tsx's real fix
+  (removing type="email" and any "email" substring from the field's id, so
+  Chrome's autofill heuristics stop targeting it at all) — this covers any
+  browser/version where autofill still gets applied by some other route.
+*/
+#subscribe-field-mobile:-webkit-autofill,
+#subscribe-field-mobile:-webkit-autofill:hover,
+#subscribe-field-mobile:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0px 1000px #0f0f10 inset;
+  box-shadow: 0 0 0px 1000px #0f0f10 inset;
+  border-color: rgba(255, 255, 255, 0.4);
+  /* Stops Chrome's autofill background-color flash/transition on some
+     versions by making its own transition effectively instant-but-never. */
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 *,
