@@ -96,7 +96,7 @@ export function CartSmallIcon(props: SVGProps<SVGSVGElement>) {
 
 export function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg width="16" height="10" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg width="16" height="10" viewBox="0 0 16 10" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path d="M1.333 8.5 8 1.833 14.666 8.5" strokeWidth={2.083} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

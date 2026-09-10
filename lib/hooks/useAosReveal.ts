@@ -116,23 +116,39 @@ export function useAosReveal<T extends HTMLElement>({
       // of the REAL viewport bottom — reproducing AOS's "larger offset
       // triggers later" behavior exactly.
       //
-      // The +200px on top/left/right is a fix for a real bug, not a
-      // stylistic choice: IntersectionObserver measures an element's
-      // ACTUAL RENDERED position, including any active CSS transform —
-      // and Reveal's "hidden" state applies exactly that (e.g. fade-down
-      // is `translateY(-100px)`). For most elements that's harmless (a
+      // The +200px forgiveness on all four sides is a fix for a real bug,
+      // not a stylistic choice: IntersectionObserver measures an
+      // element's ACTUAL RENDERED position, including any active CSS
+      // transform — and Reveal's "hidden" state applies exactly that
+      // (e.g. fade-up is `translateY(+100px)`, fade-down is
+      // `translateY(-100px)`). For most elements that's harmless (a
       // ~100px measurement error self-corrects as the page scrolls), but
-      // for anything inside `position: sticky` content — like Header's
-      // logo/nav, which sits pinned near the top of the viewport
-      // REGARDLESS of scroll — that -100px transform permanently shifts
-      // it above y=0, so it never intersects, `inView` never flips true,
-      // and Framer never animates it back to its resting position: a
-      // permanent deadlock, not a timing glitch. Expanding the top/left/
-      // right detection zone gives enough slack to tolerate any of
-      // Reveal's ±100px hidden-state offsets without weakening the
-      // bottom-edge math that actually implements `offset`/
-      // `anchorPlacement`'s "triggers later as you scroll down" behavior.
+      // two edge cases make it a permanent deadlock instead of a timing
+      // glitch:
+      //
+      //   - TOP: anything inside `position: sticky` content — like
+      //     Header's logo/nav, which sits pinned near the top of the
+      //     viewport REGARDLESS of scroll — a `-100px` transform
+      //     permanently shifts it above y=0, so it never intersects.
+      //   - BOTTOM: the very LAST element in the document. At maximum
+      //     scroll, the viewport's bottom edge lines up with the
+      //     document's true end — a `+100px` transform (fade-up's hidden
+      //     state) renders that element BELOW the maximum reachable
+      //     scroll position, with no further scrolling possible to "catch
+      //     up" to it. Confirmed: this was exactly what was happening to
+      //     the footer's very last element (the credit line) — it never
+      //     triggered, and the untriggered `opacity: 0` element sitting in
+      //     that unreachable space read as an empty gap at the bottom of
+      //     the page.
+      //
+      // The bottom math is `transformForgivenessPx - margin` rather than
+      // a flat `+transformForgivenessPx`, so the offset/anchorPlacement
+      // "triggers later as you scroll down" behavior is preserved as much
+      // as possible for large `margin` values — it only fully cancels out
+      // (or flips to growing the root, as needed here) when `margin` is
+      // small relative to the forgiveness amount.
       const transformForgivenessPx = 200;
+      const bottomRootMargin = transformForgivenessPx - margin;
       observer = new IntersectionObserver(
         (entries) => {
           // `entries[0]` is typed as possibly `undefined` under this
@@ -156,7 +172,7 @@ export function useAosReveal<T extends HTMLElement>({
           }
         },
         {
-          rootMargin: `${transformForgivenessPx}px ${transformForgivenessPx}px -${margin}px ${transformForgivenessPx}px`,
+          rootMargin: `${transformForgivenessPx}px ${transformForgivenessPx}px ${bottomRootMargin}px ${transformForgivenessPx}px`,
           threshold: 0,
         }
       );

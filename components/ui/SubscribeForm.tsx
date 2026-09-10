@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { z } from "zod";
-import { CloseIcon, SubscribeArrowIcon } from "@/components/icons";
+import { ArrowUpIcon, CloseIcon, SubscribeArrowIcon } from "@/components/icons";
 import { useLenis } from "@/components/providers/LenisProvider";
 
 const subscribeSchema = z.object({
@@ -51,11 +51,40 @@ export default function SubscribeForm() {
   );
 }
 
-/** Unchanged from the original file — same markup, same classes, same
- * behavior. Only the function name changed (was the default export's
- * entire body). */
+// Desktop-only timings for DesktopSubscribeBar's submit sequence — kept
+// separate from the mobile popover's FILL_DURATION_MS/ARROW_DURATION_MS
+// (defined further down) since desktop's animation is a much smaller,
+// single-step addition layered onto its existing hover-reveal button
+// rather than the mobile popover's full multi-phase sequence.
+//
+// Desktop-only timing for DesktopSubscribeBar's submit confirmation: the
+// arrow shoots right and fades out, then it moves to "thanks" — kept
+// separate from the mobile popover's FILL_DURATION_MS/ARROW_DURATION_MS
+// (defined further down) since this is a much smaller, single-step
+// addition layered onto the button's existing hover-reveal mechanic,
+// rather than the mobile popover's full multi-phase sequence.
+const DESKTOP_ARROW_EXIT_MS = 350; // arrow shoots right and fades out
+const DESKTOP_THANKS_DURATION_MS = 3000; // how long "Thanks" stays in the bar before it reverts to the editable form — matches the original file's prior timing
+
+/**
+ * Desktop bar — same always-editable input + hover-reveal Subscribe button
+ * as before, with two additions on top of the original:
+ *
+ *   1. "Thanks — you're on the list." now swaps in INSIDE the bar itself
+ *      (replacing the input/button) instead of appearing as a separate
+ *      line of text below it.
+ *   2. On an actual successful submit (not just hover), the arrow that
+ *      hover already reveals continues on — it shoots further right and
+ *      fades out, a distinct "sent" motion confirming the email really
+ *      was submitted, layered on top of the existing hover-reveal
+ *      mechanism rather than replacing it (hover's CSS-driven `right`
+ *      position is untouched; the extra motion is a nested element doing
+ *      its own `x`/`opacity` animation on submit only).
+ */
 function DesktopSubscribeBar() {
-  const [submitted, setSubmitted] = useState(false);
+  const [phase, setPhase] = useState<"form" | "submitting" | "thanks">("form");
+  const phaseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revertTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
     register,
     handleSubmit,
@@ -63,50 +92,148 @@ function DesktopSubscribeBar() {
     formState: { errors },
   } = useForm<SubscribeValues>({ resolver: zodResolver(subscribeSchema) });
 
+  // Clears any in-flight sequence timers on unmount — same reasoning as
+  // the mobile popover's identical cleanup: a raw setTimeout isn't tied to
+  // component lifecycle, so without this a stale timer could fire after
+  // the fact and yank phase around unexpectedly.
+  useEffect(() => {
+    return () => {
+      if (phaseTimeoutRef.current) clearTimeout(phaseTimeoutRef.current);
+      if (revertTimeoutRef.current) clearTimeout(revertTimeoutRef.current);
+    };
+  }, []);
+
   const onSubmit = (_values: SubscribeValues) => {
     // Dummy: no API call. Replace this with a real POST when ready.
-    setSubmitted(true);
     reset();
-    setTimeout(() => setSubmitted(false), 3000);
+    setPhase("submitting");
+    phaseTimeoutRef.current = setTimeout(() => {
+      setPhase("thanks");
+      revertTimeoutRef.current = setTimeout(() => {
+        setPhase("form");
+      }, DESKTOP_THANKS_DURATION_MS);
+    }, DESKTOP_ARROW_EXIT_MS);
   };
 
   return (
     <div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        className="flex items-center justify-between bg-[#181A1B] rounded-lg py-2 px-4"
-      >
-        <div className="flex-1 mr-2">
-          <label htmlFor="email" className="sr-only">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            autoComplete="email"
-            placeholder="Email"
-            className="block w-full outline-none outline-0 border-none border-0 border-transparent bg-transparent caret-white placeholder-[#BDC0C2] focus:border-transparent focus:bg-transparent focus:text-white focus:placeholder-gray-500 focus:outline-none focus:ring-0 focus:ring-transparent focus:placeholder:text-transparent font-light text-[0.9375rem]"
-            {...register("email")}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="group relative flex bg-[#0A0A0B] min-w-[8.125rem] w-[8.125rem] h-[3.1875rem] rounded-lg overflow-hidden border border-transparent hover:border-[#3F3F45] transition-all duration-700"
-          style={{ willChange: "transform" }}
+      <div className="relative flex items-center bg-[#181A1B] rounded-lg py-2 px-4 min-h-[4.1875rem]">
+        {/* The <form> (and the button inside it) now stay permanently
+            mounted across every phase — only the email-input-vs-"Thanks"
+            portion on the left swaps via its own inner AnimatePresence.
+            Previously the WHOLE form (input + button together) was what
+            got swapped for the Thanks message, which meant the button
+            disappeared right along with the input — not intended. */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="flex items-center justify-between w-full"
         >
-          <span className="flex justify-center items-center h-full w-full transform group-hover:-translate-x-[14px] transition-transform cursor-pointer duration-700">
-            Subscribe
-          </span>
-          <span className="absolute top-0 -right-[30px] group-hover:-right-0 h-full flex justify-center items-center px-1.5 bg-[#29292D] transition-all cursor-pointer duration-700">
-            <SubscribeArrowIcon />
-          </span>
-        </button>
-      </form>
+          <div className="flex-1 mr-2">
+            <AnimatePresence mode="wait" initial={false}>
+              {phase === "thanks" ? (
+                <motion.p
+                  key="thanks"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { duration: 0.25 } }}
+                  exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                  className="text-sm text-[#BDC0C2]"
+                >
+                  Thanks — you&apos;re on the list.
+                </motion.p>
+              ) : (
+                <motion.div
+                  key="input"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { duration: 0.25 } }}
+                  exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                >
+                  <label htmlFor="email" className="sr-only">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    autoComplete="email"
+                    disabled={phase !== "form"}
+                    placeholder="Email"
+                    className="block w-full outline-none outline-0 border-none border-0 border-transparent bg-transparent caret-white placeholder-[#BDC0C2] focus:border-transparent focus:bg-transparent focus:text-white focus:placeholder-gray-500 focus:outline-none focus:ring-0 focus:ring-transparent focus:placeholder:text-transparent font-light text-[0.9375rem] disabled:opacity-60"
+                    {...register("email")}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button
+            type="submit"
+            disabled={phase !== "form"}
+            className="group relative flex bg-[#0A0A0B] min-w-[8.125rem] w-[8.125rem] h-[3.1875rem] rounded-lg overflow-hidden border border-transparent hover:border-[#3F3F45] transition-all duration-700 disabled:cursor-default"
+            style={{ willChange: "transform" }}
+          >
+            {/* Both spans below normally rely purely on `group-hover:` for
+                their reveal, which is fine while the button is enabled —
+                but two other phases need it explicitly overridden instead
+                of left to fall through to hover:
+                  - "submitting": the button gets `disabled`, and many
+                    browsers don't match `:hover` on a disabled element at
+                    all — without forcing this open, that could snap both
+                    back to resting position INSTANTLY the moment
+                    submission starts, while the arrow's animation above is
+                    still mid-flight inside that now-collapsing space.
+                  - "thanks": the mouse is very likely still hovering right
+                    after the click that triggered it, and the strip has
+                    nothing in it to reveal at that point (the arrow only
+                    renders during "form") — left to fall through to
+                    `group-hover`, that hover state would keep revealing an
+                    empty strip, visible as a stray sliver poking out past
+                    the button's edge. Forcing it fully closed here instead
+                    keeps the button looking clean regardless of hover.
+                Only the plain "form" phase behaves via real `:hover`, same
+                as always. */}
+            <span
+              className={`flex justify-center items-center h-full w-full transform transition-transform cursor-pointer duration-700 ${
+                phase === "submitting"
+                  ? "-translate-x-[14px]"
+                  : phase === "thanks"
+                    ? ""
+                    : "group-hover:-translate-x-[14px]"
+              }`}
+            >
+              Subscribe
+            </span>
+            <span
+              className={`absolute top-0 h-full flex justify-center items-center px-1.5 bg-[#29292D] transition-all cursor-pointer duration-700 ${
+                phase === "submitting"
+                  ? "right-0"
+                  : phase === "thanks"
+                    ? "-right-[30px]"
+                    : "-right-[30px] group-hover:-right-0"
+              }`}
+            >
+              {phase === "submitting" && (
+                <motion.span
+                  initial={{ x: 0, opacity: 1 }}
+                  animate={{ x: 28, opacity: 0 }}
+                  transition={{ duration: DESKTOP_ARROW_EXIT_MS / 1000, ease: "easeIn" }}
+                >
+                  <SubscribeArrowIcon />
+                </motion.span>
+              )}
+              {/* Only the resting "form" phase shows the plain static
+                  arrow — during "thanks" it stays hidden entirely, and
+                  only comes back once the bar has fully reverted to
+                  "form". Previously this rendered on any phase OTHER than
+                  "submitting" (i.e. "form" OR "thanks"), which meant the
+                  arrow popped back the instant its shoot-and-fade finished
+                  — well before "Thanks" itself had disappeared. */}
+              {phase === "form" && <SubscribeArrowIcon />}
+            </span>
+          </button>
+        </form>
+      </div>
 
       {errors.email && <p className="mt-2 text-xs text-red-400">{errors.email.message}</p>}
-      {submitted && !errors.email && <p className="mt-2 text-xs text-[#BDC0C2]">Thanks — you&apos;re on the list.</p>}
     </div>
   );
 }
@@ -155,11 +282,17 @@ function MobileSubscribeTrigger() {
         onClick={open}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="flex items-center justify-between w-full bg-[#181A1B] rounded-lg py-2 px-4 text-left active:scale-[0.98] transition-transform"
+        className="flex items-center justify-between w-full bg-[#0A0A0B] rounded-lg py-2 pl-4 pr-2 text-left active:scale-[0.98] transition-transform"
       >
-        <span className="flex-1 mr-2 font-light text-[0.9375rem] text-[#BDC0C2]">Email</span>
-        <span className="flex items-center justify-center bg-[#0A0A0B] min-w-[8.125rem] w-[8.125rem] h-[3.1875rem] rounded-lg font-light text-[0.9375rem] shrink-0">
-          Subscribe
+        <span className="flex-1 mr-2 font-medium text-sm text-white">Subscribe</span>
+        <span className="flex items-center justify-center bg-[#181A1B] text-white h-9 w-9 rounded-lg shrink-0">
+          {/* ArrowUpIcon rotated: 180° (pointing down) while closed — the
+              conventional "tap to reveal a dropdown" affordance — and back
+              to its natural upward orientation once open, doubling as a
+              simple, free open/closed state indicator. Rotation lives on
+              the icon itself now, not the button around it, so the square
+              stays static and only the chevron flips. */}
+          <ArrowUpIcon className={`transition-transform duration-300 ${isOpen ? "rotate-0" : "rotate-180"}`} />
         </span>
       </button>
 
