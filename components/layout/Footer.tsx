@@ -6,43 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
 import SubscribeForm from "@/components/ui/SubscribeForm";
 import { LogoIcon, ArrowUpIcon } from "@/components/icons";
+import { usePressedState } from "@/lib/hooks/usePressedState";
 import { footerProductLinks, footerSupportLinks, socials } from "@/lib/data";
 
 // Matches AOS's default easing (CSS "ease"), same as Reveal.tsx/AnimatedHeading.
 const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
-
-/**
- * A tap/click "pressed" state driven by real pointer events instead of the
- * CSS `:active` pseudo-class.
- *
- * WHY: `:active` is well-known to be unreliable on <a> tags whose href
- * triggers navigation — even a same-page anchor jump like "#home" or "#"
- * counts. On mobile specifically, when a tap starts navigating, the browser
- * can lose track of the follow-up event that's supposed to clear `:active`,
- * so the "pressed" look gets stuck on screen indefinitely (confirmed: this
- * is exactly what was happening to the social icons and the back-to-top
- * button — both real navigating anchors — while the Subscribe trigger's own
- * tap feedback was fine, because it's a plain <button> with no href at all).
- *
- * Tracking press state ourselves via pointerdown/up/leave/cancel means WE
- * decide exactly when it turns on and off — not the browser's internal
- * bookkeeping around a navigation it's mid-way through — so it can't get
- * stuck. pointerleave/pointercancel are included specifically so a finger
- * sliding off the element (not just a clean tap-and-lift) still correctly
- * clears it.
- */
-function usePressedState() {
-  const [isPressed, setIsPressed] = useState(false);
-  return {
-    isPressed,
-    handlers: {
-      onPointerDown: () => setIsPressed(true),
-      onPointerUp: () => setIsPressed(false),
-      onPointerLeave: () => setIsPressed(false),
-      onPointerCancel: () => setIsPressed(false),
-    },
-  };
-}
 
 function SocialLink({ social }: { social: (typeof socials)[number] }) {
   const { isPressed, handlers } = usePressedState();

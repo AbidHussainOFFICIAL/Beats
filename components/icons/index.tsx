@@ -94,6 +94,19 @@ export function CartSmallIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Used for Products' "added to bag" confirmation — swaps in over
+ * CartSmallIcon briefly after tapping the add-to-bag button. viewBox
+ * included explicitly from the start (unlike ArrowUpIcon originally,
+ * which caused a real cropping bug the first time it was ever resized
+ * via CSS — see Footer.tsx's link-row chevrons). */
+export function CheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="16" height="18" viewBox="0 0 16 18" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M3 9.5 6.75 13.25 13.5 5.5" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="16" height="10" viewBox="0 0 16 10" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>

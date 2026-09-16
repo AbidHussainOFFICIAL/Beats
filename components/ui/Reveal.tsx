@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { ReactNode, Ref } from "react";
+import type { MouseEventHandler, PointerEventHandler, ReactNode, Ref } from "react";
 import { useAosReveal, type AnchorPlacement } from "@/lib/hooks/useAosReveal";
 
 export type RevealVariant =
@@ -37,6 +37,21 @@ interface RevealProps {
   anchorPlacement?: AnchorPlacement;
   className?: string;
   as?: "div" | "span" | "li";
+  // Deliberately narrow — only the specific pointer/click props actually
+  // needed (e.g. Products.tsx's tap-press handlers), NOT the full
+  // HTMLAttributes surface. Extending the whole surface pulled in
+  // `onAnimationStart`/`onAnimationEnd`/etc., which Framer Motion's own
+  // `motion` components redefine with an incompatible signature (their own
+  // animation-state callbacks, not native CSS animation events) — a real
+  // type conflict, not a false positive. Add more specific props here
+  // individually if a future caller needs them, rather than widening this
+  // back to the full HTMLAttributes surface.
+  onPointerDown?: PointerEventHandler<HTMLElement>;
+  onPointerUp?: PointerEventHandler<HTMLElement>;
+  onPointerLeave?: PointerEventHandler<HTMLElement>;
+  onPointerCancel?: PointerEventHandler<HTMLElement>;
+  onClick?: MouseEventHandler<HTMLElement>;
+  "aria-label"?: string;
 }
 
 // AOS's default translate distance is 100px for fades, with a 0.6 scale for zoom-ins.
@@ -80,6 +95,7 @@ export default function Reveal({
   anchorPlacement,
   className,
   as = "div",
+  ...rest
 }: RevealProps) {
   const hidden = hiddenStateFor(variant);
 
@@ -130,6 +146,7 @@ export default function Reveal({
               transition: { duration: duration / 1000, ease: AOS_DEFAULT_EASE },
             }
       }
+      {...rest}
     >
       {children}
     </MotionTag>
