@@ -11,14 +11,17 @@ import {
 } from "framer-motion";
 import { useEffect, useRef } from "react";
 
-type Direction = "up" | "down" | "left" | "right";
+type Direction = "up" | "down" | "left" | "right" | "rotate";
 
 interface ParallaxImageProps extends Omit<HTMLMotionProps<"img">, "style" | "ref"> {
-  /** matches simpleParallax's `orientation` option */
+  /** matches simpleParallax's `orientation` option, plus a new "rotate"
+   * option (not from simpleParallax) that drives a scroll-linked rotation
+   * instead of a positional drift — see `rotateRange` below. */
   direction: Direction;
   className?: string;
   wrapperClassName?: string;
-  /** px of total drift across the scroll range. Default 28 (subtle). */
+  /** px of total drift across the scroll range. Default 28 (subtle).
+   * Unused when direction === "rotate" — see `rotateRange` instead. */
   distance?: number;
   /** Spring stiffness — higher = snappier/faster catch-up to scroll position, lower = laggier. Default 90. */
   springStiffness?: number;
@@ -26,6 +29,7 @@ interface ParallaxImageProps extends Omit<HTMLMotionProps<"img">, "style" | "ref
    * When true, the drift only ever moves further toward its end position —
    * it holds at the furthest point reached and does NOT reverse if the user
    * scrolls back up. Default false (normal reversible scroll-linked drift).
+   * Only affects x/y drift directions; not currently wired up for "rotate".
    */
   holdPeak?: boolean;
   /**
@@ -50,6 +54,16 @@ interface ParallaxImageProps extends Omit<HTMLMotionProps<"img">, "style" | "ref
    * scroll-driven sequence (e.g. Hero's pinned CTA reveal) has finished.
    */
   startAfterPx?: number;
+  /**
+   * Only used when direction === "rotate". Degrees, [from, to] as scroll
+   * progress goes 0→1. Default [-8, 8] — a modest, subtle back-and-forth
+   * tilt, matching the same restrained feel `distance`'s default (28px)
+   * gives the positional drift directions. Combines naturally with any
+   * static CSS rotation already on a wrapping element (e.g. a resting
+   * tilt), since that's a separate element/transform — this only rotates
+   * the <img> itself.
+   */
+  rotateRange?: [number, number];
 }
 
 /**
@@ -74,6 +88,7 @@ export default function ParallaxImage({
   holdPeak = false,
   scrollRangePx,
   startAfterPx = 0,
+  rotateRange,
   ...imageProps
 }: ParallaxImageProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -116,9 +131,16 @@ export default function ParallaxImage({
   const rawDownUp = useTransform(progress, [0, 1], [-DRIFT_PX, DRIFT_PX]);
   const rawLeftRight = useTransform(progress, [0, 1], [-DRIFT_PX, DRIFT_PX]);
   const rawRightLeft = useTransform(progress, [0, 1], [DRIFT_PX, -DRIFT_PX]);
+  // Always called unconditionally (Rules of Hooks — same reason rawUpDown/
+  // rawDownUp/etc. above are all computed regardless of `direction` too),
+  // then selected into `rotate` below only when direction === "rotate".
+  // For every other direction this just settles at 0 and stays there —
+  // zero behavior change for any existing caller.
+  const rawRotate = useTransform(progress, [0, 1], rotateRange ?? [-8, 8]);
 
   const rawY = direction === "up" ? rawUpDown : direction === "down" ? rawDownUp : null;
   const rawX = direction === "left" ? rawRightLeft : direction === "right" ? rawLeftRight : null;
+  const rawRotateSelected = direction === "rotate" ? rawRotate : null;
 
   // "Peak hold" mode: track the most extreme value reached so far and never
   // regress toward the start, even if the raw scroll-linked value would.
@@ -142,10 +164,11 @@ export default function ParallaxImage({
   const springConfig = { stiffness: springStiffness, damping: 20, mass: 0.6 };
   const y = useSpring(holdPeak ? heldY : rawY ?? 0, springConfig);
   const x = useSpring(holdPeak ? heldX : rawX ?? 0, springConfig);
+  const rotate = useSpring(rawRotateSelected ?? 0, springConfig);
 
   return (
     <div ref={ref} className={wrapperClassName}>
-      <motion.img {...imageProps} style={{ x, y, willChange: "transform" }} className={className} />
+      <motion.img {...imageProps} style={{ x, y, rotate, willChange: "transform" }} className={className} />
     </div>
   );
 }
