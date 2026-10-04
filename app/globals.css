@@ -198,8 +198,13 @@ header ul li .nav-underline:before {
   transform: translateX(-50%);
 }
 
-.logo:hover .logo-svg {
-  transform: rotateY(180deg);
+/* Only flip the logo on devices with real hover — on touch, plain :hover
+   would stay matched after a tap (same reason tailwind.config.ts enables
+   hoverOnlyWhenSupported for every `hover:` utility). */
+@media (hover: hover) {
+  .logo:hover .logo-svg {
+    transform: rotateY(180deg);
+  }
 }
 
 /* Respect reduced motion preference for all Framer Motion driven elements */
