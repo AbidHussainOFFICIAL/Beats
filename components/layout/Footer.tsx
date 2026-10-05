@@ -255,12 +255,12 @@ export default function Footer() {
           <p className="text-[#A2A6A9] text-center font-light text-[0.8125rem]">
             Created By{" "}
             <a
-              href="https://jakebogan.dev"
+              href="https://abidhussain.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-underline text-[#A2A6A9] hover:text-white transition-colors pb-0.5"
             >
-              Jake Bogan
+              Abid Hussain
             </a>
           </p>
         </Reveal>

@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "description": "Beats headphones landing page — Next.js + TypeScript rebuild",
-  "author": "Jake Bogan",
+  "author": "Abid Hussain",
   "license": "ISC",
   "scripts": {
     "dev": "next dev",
