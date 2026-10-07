@@ -128,7 +128,7 @@ export default function Case() {
   const isWide = useMediaQuery("(min-width: 640px)");
 
   return (
-    <section id="case" className="px-6 mt-[5.75rem] lg:mt-[11.75rem] transition-[margin]">
+    <section id="case" className="px-6 mt-[5.75rem] max-sm:mt-[4rem] lg:mt-[11.75rem] transition-[margin]">
       {/* max-sm:leading-[4rem]: below sm the heading's inherited 1.5 line
           height made its box 84px tall around 56px text — tightened to 64px
           on phones only; sm+ keeps the inherited value exactly as before. */}

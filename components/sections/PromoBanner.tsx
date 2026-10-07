@@ -5,6 +5,7 @@ import Reveal from "@/components/ui/Reveal";
 import ParallaxImage from "@/components/ui/ParallaxImage";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
+import { useScrollToSection } from "@/lib/hooks/useScrollToSection";
 import { BagIcon } from "@/components/icons";
 
 /**
@@ -28,13 +29,18 @@ import { BagIcon } from "@/components/icons";
  * `isPressed`-driven ones — desktop's existing hover treatment is
  * untouched; touch now gets an equivalent via tap instead of just
  * inheriting nothing from a `:hover` that can never match.
+ *
+ * `onClick` is only passed below the lg breakpoint (see PromoBanner), where
+ * the button takes the visitor down to the Products section; on desktop it
+ * is still a plain button, as before.
  */
-function BuyNowButton() {
+function BuyNowButton({ onClick }: { onClick?: () => void }) {
   const { isPressed, handlers } = usePressedState();
 
   return (
     <button
       type="button"
+      onClick={onClick}
       {...handlers}
       className={`flex items-center justify-center rounded-lg cursor-pointer w-32 h-11 593:w-[9.25rem] 593:h-[3.4375rem] transition-all duration-700 ${
         isPressed ? "bg-white" : "bg-black group-hover:bg-white"
@@ -67,9 +73,13 @@ export default function PromoBanner() {
   // per-instance prop and can't itself be made responsive via CSS classes.
   // Same pattern Hero.tsx already uses for its own desktop/mobile split.
   const isDesktop = useMediaQuery("(min-width: 593px)");
+  // Below lg (mobile and tablet, like the rest of the mobile work) "Buy now"
+  // scrolls to the Products section; at lg+ it stays a plain button.
+  const isBelowLg = !useMediaQuery("(min-width: 1024px)");
+  const scrollToSection = useScrollToSection();
 
   return (
-    <section className="relative mt-[5.75rem] px-6 lg:mt-[11.75rem] transition-[margin]">
+    <section className="relative mt-[5.75rem] max-sm:mt-[4rem] px-6 lg:mt-[11.75rem] transition-[margin]">
       <Reveal variant="zoom-in" duration={700} offset={300}>
         {/*
           overflow-hidden 593:overflow-visible: mobile-only clipping — this
@@ -103,7 +113,7 @@ export default function PromoBanner() {
             </p>
             <div>
               <Reveal variant="zoom-in" duration={700} delay={50} offset={300}>
-                <BuyNowButton />
+                <BuyNowButton onClick={isBelowLg ? () => scrollToSection("products") : undefined} />
               </Reveal>
             </div>
           </div>

@@ -15,6 +15,7 @@ import ParallaxImage from "@/components/ui/ParallaxImage";
 import { BagIcon } from "@/components/icons";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
+import { useScrollToSection } from "@/lib/hooks/useScrollToSection";
 import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/constants";
 
 /**
@@ -126,13 +127,17 @@ function mountIn(reduced: boolean | null, delay: number) {
  * `compact` is the column-width version used in the mobile pinned sequence:
  * it fills its wrapper, and its bag icon is dropped below 360px so the
  * label and price still fit.
+ *
+ * `onClick` is only passed by the mobile layouts, where the button takes the
+ * visitor down to the Products section; the desktop buttons are unchanged.
  */
-function AddToBagButton({ compact = false }: { compact?: boolean }) {
+function AddToBagButton({ compact = false, onClick }: { compact?: boolean; onClick?: () => void }) {
   const { isPressed, handlers } = usePressedState();
 
   return (
     <button
       type="button"
+      onClick={onClick}
       {...handlers}
       className={`group relative flex items-center justify-center rounded-lg overflow-hidden transition-all duration-300 ${
         compact ? "w-full h-12" : "w-[15.5rem] h-[3.4375rem]"
@@ -421,8 +426,8 @@ function MobilePoster({
 }
 
 /**
- * MOBILE / TABLET pinned sequence (<lg). The hero stays pinned for about one
- * screen of scrolling, scrubbed directly by scroll position (no springs, so
+ * MOBILE / TABLET pinned sequence (<lg). The hero stays pinned for about
+ * three-quarters of a screen of scrolling, scrubbed directly by scroll position (no springs, so
  * it reverses cleanly):
  *
  *   rest      : headphone with "On ear" behind it, "Add to Bag" underneath.
@@ -464,6 +469,7 @@ function HeroMobilePinned() {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const viewportWidthRef = useRef(typeof window === "undefined" ? 0 : window.innerWidth);
+  const scrollToSection = useScrollToSection();
   const { scrollYProgress } = useScroll({
     target: runwayRef,
     offset: ["start start", "end end"],
@@ -563,7 +569,7 @@ function HeroMobilePinned() {
           className="relative z-20 mx-auto mt-6 w-[calc(100%-7.375rem)] sm:w-[22rem]"
         >
           <motion.div {...mountIn(false, 0.5)}>
-            <AddToBagButton compact />
+            <AddToBagButton compact onClick={() => scrollToSection("products")} />
           </motion.div>
         </motion.div>
       </div>
@@ -579,6 +585,7 @@ function HeroMobilePinned() {
  */
 function HeroMobileStatic() {
   const prefersReducedMotion = useReducedMotion();
+  const scrollToSection = useScrollToSection();
 
   return (
     <div className="mx-auto flex w-full max-w-[28rem] flex-col items-center text-center">
@@ -603,7 +610,7 @@ function HeroMobileStatic() {
       </motion.p>
 
       <motion.div {...mountIn(prefersReducedMotion, 0.6)} className="mt-6">
-        <AddToBagButton />
+        <AddToBagButton onClick={() => scrollToSection("products")} />
       </motion.div>
     </div>
   );

@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CloseIcon, MenuIcon, ShopArrowIcon } from "@/components/icons";
 import { useLenis } from "@/components/providers/LenisProvider";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
+import { useScrollToSection } from "@/lib/hooks/useScrollToSection";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { navLinks } from "@/lib/data";
 
@@ -20,9 +21,10 @@ const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0
  * overlap. Tap feedback uses real pointer events (see usePressedState)
  * since `hover:` doesn't apply on touch.
  *
- * Shop has no destination yet (same placeholder "#" as the desktop button).
- * preventDefault stops the bare "#" from snapping the page to the top;
- * point this at the real shop URL when there is one.
+ * Shop has no store URL yet, so it closes the menu and takes the visitor to
+ * the Products section instead (the desktop Shop button is still a
+ * placeholder). preventDefault stops the bare "#" from snapping the page to
+ * the top; point this at the real shop URL when there is one.
  */
 function ShopButton({
   duration,
@@ -91,6 +93,7 @@ export default function MobileNav() {
   const prefersReducedMotion = useReducedMotion();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const lenis = useLenis();
+  const scrollToSection = useScrollToSection();
 
   // Portals can only render after mount (no `document` on the server) —
   // gating on a mounted flag avoids a hydration mismatch.
@@ -254,7 +257,10 @@ export default function MobileNav() {
                       <ShopButton
                         duration={duration}
                         delay={baseDelay + navLinks.length * staggerDelay}
-                        onNavigate={() => setIsOpen(false)}
+                        onNavigate={() => {
+                          setIsOpen(false);
+                          scrollToSection("products");
+                        }}
                       />
                     </div>
                   </div>

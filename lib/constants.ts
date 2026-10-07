@@ -11,6 +11,6 @@ export const HERO_RUNWAY_HEIGHT_VH = 220;
 
 /** Height (in svh) of the hero's MOBILE scroll runway. The pinned section is
  * one screen tall, so the sequence plays over roughly (this − 100)svh of
- * scrolling — about one screen at 200. `svh` (not `vh`) so the runway doesn't
- * jump when the mobile browser's toolbar shows or hides. */
-export const HERO_MOBILE_RUNWAY_HEIGHT_SVH = 200;
+ * scrolling — about three-quarters of a screen at 170. `svh` (not `vh`) so
+ * the runway doesn't jump when the mobile browser's toolbar shows or hides. */
+export const HERO_MOBILE_RUNWAY_HEIGHT_SVH = 170;
