@@ -117,7 +117,7 @@ function FooterAccordionSection({ title, links }: { title: string; links: Footer
                   not just the containers' edges. */}
               {links.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     className="flex items-center justify-between text-[#BDC0C2] font-light text-[0.9375rem] hover:text-white transition-colors"
                   >
@@ -133,7 +133,7 @@ function FooterAccordionSection({ title, links }: { title: string; links: Footer
                         the text on hover automatically, no separate
                         hover rule needed for it. */}
                     <ArrowUpIcon className="w-2.5 h-2.5 rotate-90 opacity-40 shrink-0" />
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -144,6 +144,11 @@ function FooterAccordionSection({ title, links }: { title: string; links: Footer
   );
 }
 
+/**
+ * Every footer link is a real destination now (see lib/data.ts), rendered
+ * with Next's <Link> so moving between pages is instant instead of a full
+ * page reload. The logo, socials, back-to-top and credit links are unchanged.
+ */
 export default function Footer() {
   return (
     <footer className="relative mt-[5.75rem] px-6 lg:mt-[11.75rem] transition-[margin] z-30">
@@ -173,9 +178,9 @@ export default function Footer() {
               {footerProductLinks.map((link) => (
                 <li key={link.label}>
                   <Reveal variant="fade-up" duration={700} delay={link.delay} anchorPlacement="top-bottom">
-                    <a href={link.href} className="text-[#BDC0C2] font-light text-[0.9375rem] hover:text-white transition-colors">
+                    <Link href={link.href} className="text-[#BDC0C2] font-light text-[0.9375rem] hover:text-white transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </Reveal>
                 </li>
               ))}
@@ -190,9 +195,9 @@ export default function Footer() {
               {footerSupportLinks.map((link) => (
                 <li key={link.label}>
                   <Reveal variant="fade-up" duration={700} delay={link.delay} anchorPlacement="top-bottom">
-                    <a href={link.href} className="text-[#BDC0C2] font-light text-[0.9375rem] hover:text-white transition-colors">
+                    <Link href={link.href} className="text-[#BDC0C2] font-light text-[0.9375rem] hover:text-white transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </Reveal>
                 </li>
               ))}
@@ -255,12 +260,12 @@ export default function Footer() {
           <p className="text-[#A2A6A9] text-center font-light text-[0.8125rem]">
             Created By{" "}
             <a
-              href="https://abidhussain.dev"
+              href="https://jakebogan.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-underline text-[#A2A6A9] hover:text-white transition-colors pb-0.5"
             >
-              Abid Hussain
+              Jake Bogan
             </a>
           </p>
         </Reveal>

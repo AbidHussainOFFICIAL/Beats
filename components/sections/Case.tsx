@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
 import ScrollRevealImage from "@/components/ui/ScrollRevealImage";
@@ -39,14 +40,16 @@ const CASE_DESCRIPTION =
  * no scale — so the button's hit box never changes under the finger. On
  * desktop a press looks the same as hover, so nothing changes there.
  *
- * "More info" has no destination yet, so it does nothing when tapped.
+ * "More info" opens the case's product page.
  */
 function MoreInfoButton() {
+  const router = useRouter();
   const { isPressed, handlers } = usePressedState();
 
   return (
     <button
       type="button"
+      onClick={() => router.push("/products/case")}
       {...handlers}
       className={`group flex items-center justify-center rounded-lg w-[9.75rem] h-[3.4375rem] overflow-hidden transition-colors duration-300 ${
         isPressed ? "bg-white" : "bg-[#1E1E21] hover:bg-white"

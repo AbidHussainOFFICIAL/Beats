@@ -73,21 +73,29 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     // `scroll-behavior: smooth` — both removed from globals.css/layout.tsx
     // specifically because they'd otherwise fight Lenis's own smoothing.
     // This delegated (document-level, not per-link) click handler routes
-    // any `#`-hash link through Lenis's `scrollTo` instead, so they keep
-    // the exact same eased motion as normal wheel scrolling — and being
-    // delegated, it transparently covers every current hash link plus any
-    // added later, with no per-link wiring needed.
+    // any hash link that points at the CURRENT page through Lenis's
+    // `scrollTo` instead, so they keep the exact same eased motion as
+    // normal wheel scrolling — and being delegated, it transparently covers
+    // every current hash link plus any added later, with no per-link wiring.
+    //
+    // It matches both bare hashes ("#specs") and same-page absolute ones
+    // ("/#specs", which the nav and footer use so they also work from other
+    // pages). A link whose path is a DIFFERENT page is left alone, so it
+    // navigates normally and the browser/Next scrolls to the hash on arrival.
     const handleAnchorClick = (event: MouseEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      const anchor = target.closest("a[href^='#']");
+      const anchor = target.closest<HTMLAnchorElement>("a[href*='#']");
       if (!anchor) return;
-      const href = anchor.getAttribute("href");
-      if (!href || href === "#") return;
-      const destination = document.querySelector(href);
+
+      const url = new URL(anchor.href, window.location.href);
+      if (url.origin !== window.location.origin || url.pathname !== window.location.pathname) return;
+      if (!url.hash || url.hash === "#") return;
+
+      const destination = document.getElementById(decodeURIComponent(url.hash.slice(1)));
       if (!destination) return;
       event.preventDefault();
-      instance.scrollTo(destination as HTMLElement);
+      instance.scrollTo(destination);
     };
     document.addEventListener("click", handleAnchorClick);
 

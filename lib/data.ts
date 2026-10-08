@@ -10,11 +10,13 @@ import {
   TwitterIcon,
 } from "@/components/icons";
 
+// Absolute ("/#...") hrefs so these work from every page, not just the
+// landing page. On the landing page LenisProvider still smooth-scrolls them.
 export const navLinks = [
   { href: "/", label: "Home" },
-  { href: "#specs", label: "Specs" },
-  { href: "#case", label: "Case" },
-  { href: "#products", label: "Products" },
+  { href: "/#specs", label: "Specs" },
+  { href: "/#case", label: "Case" },
+  { href: "/#products", label: "Products" },
 ] as const;
 
 export interface Spec {
@@ -34,6 +36,8 @@ export const specs: Spec[] = [
 ];
 
 export interface Product {
+  /** matches the product's slug in lib/catalog.ts (its page is /products/<slug>) */
+  slug: string;
   name: string;
   price: string;
   image: string;
@@ -41,11 +45,11 @@ export interface Product {
 }
 
 export const products: Product[] = [
-  { name: "Black", price: "N299K", image: "/images/content/headphone-1.png", delay: 0 },
-  { name: "Red Black", price: "N299K", image: "/images/content/headphone-2.png", delay: 100 },
-  { name: "Blue", price: "N299K", image: "/images/content/headphone-3.png", delay: 200 },
-  { name: "Twilight Grey", price: "N299K", image: "/images/content/headphone-4.png", delay: 300 },
-  { name: "Night Black", price: "N299K", image: "/images/content/headphone-5.png", delay: 400 },
+  { slug: "black", name: "Black", price: "N299K", image: "/images/content/headphone-1.png", delay: 0 },
+  { slug: "red-black", name: "Red Black", price: "N299K", image: "/images/content/headphone-2.png", delay: 100 },
+  { slug: "blue", name: "Blue", price: "N299K", image: "/images/content/headphone-3.png", delay: 200 },
+  { slug: "twilight-grey", name: "Twilight Grey", price: "N299K", image: "/images/content/headphone-4.png", delay: 300 },
+  { slug: "night-black", name: "Night Black", price: "N299K", image: "/images/content/headphone-5.png", delay: 400 },
 ];
 
 export const brandLogos = [
@@ -56,17 +60,17 @@ export const brandLogos = [
 ];
 
 export const footerProductLinks = [
-  { label: "Headphones", href: "#", delay: 100 },
-  { label: "Earphones", href: "#", delay: 150 },
-  { label: "Earbuds", href: "#", delay: 200 },
-  { label: "Accessories", href: "#", delay: 250 },
+  { label: "Headphones", href: "/#products", delay: 100 },
+  { label: "Accessories", href: "/products/case", delay: 150 },
+  { label: "Works with", href: "/works-with", delay: 200 },
+  { label: "Your bag", href: "/bag", delay: 250 },
 ];
 
 export const footerSupportLinks = [
-  { label: "Product help", href: "#", delay: 100 },
-  { label: "Register", href: "#", delay: 150 },
-  { label: "Updates", href: "#", delay: 200 },
-  { label: "Provides", href: "#", delay: 250 },
+  { label: "Product help", href: "/help", delay: 100 },
+  { label: "Register", href: "/register", delay: 150 },
+  { label: "Updates", href: "/updates", delay: 200 },
+  { label: "Shipping & returns", href: "/shipping-returns", delay: 250 },
 ];
 
 export const socials = [

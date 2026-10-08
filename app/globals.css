@@ -102,6 +102,21 @@ html.lenis body {
   transition: background-color 9999s ease-in-out 0s;
 }
 
+/*
+  Same autofill repaint as above, for the checkout form's fields (see
+  components/ui/FormField.tsx, which adds the `field-input` class): without
+  it Chrome paints autofilled fields in its own light-blue background.
+*/
+.field-input:-webkit-autofill,
+.field-input:-webkit-autofill:hover,
+.field-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0px 1000px #0f0f10 inset;
+  box-shadow: 0 0 0px 1000px #0f0f10 inset;
+  caret-color: #ffffff;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 *,
 *::before,
 *::after {
@@ -118,6 +133,24 @@ html.lenis body {
   border-radius: 0px;
   background: #2c2d2d;
   border: 0px solid #2c2d2d;
+}
+
+/* Scrollbars are hidden site-wide (above). Add `visible-scrollbar` to a
+   scrollable box that should show a slim one — e.g. the mini-bag's item
+   list, so people can see there's more to scroll to. */
+.visible-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: #4a4b50 transparent !important;
+}
+
+.visible-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  background-color: transparent;
+}
+
+.visible-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #4a4b50;
 }
 
 h1,

@@ -1,25 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Reveal from "@/components/ui/Reveal";
 import MobileNav from "@/components/layout/MobileNav";
+import BagButton from "@/components/layout/BagButton";
 import { LogoIcon, ShopArrowIcon } from "@/components/icons";
 import { useHideOnScroll } from "@/lib/hooks/useHideOnScroll";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { navLinks } from "@/lib/data";
 
 /**
- * DESKTOP (lg+): unchanged. Pure CSS sticky release, no scroll listener —
- * the wrapper is 140vh tall so the sticky header naturally releases after
- * that much scrolling, and an equal negative bottom margin cancels the
- * extra height so Hero isn't pushed down. (140vh is written as a literal
- * in the wrapper's classes below because Tailwind needs to see the full
- * class name; it's tuned independently of Hero's 220vh runway.)
+ * DESKTOP (lg+): a pure CSS sticky release, no scroll listener — the wrapper
+ * is 140vh tall so the sticky header naturally releases after that much
+ * scrolling, and an equal negative bottom margin cancels the extra height so
+ * the page isn't pushed down. (140vh is written as a literal in the wrapper's
+ * classes below because Tailwind needs to see the full class name; it's tuned
+ * independently of Hero's 220vh runway.) The nav now also carries the bag
+ * icon, which shows the bag's item count and opens the mini-bag flyout.
+ *
+ * On every other page the desktop header is NOT sticky: it sits at the very top
+ * of the document (absolute) and scrolls away with the page, so it never
+ * hovers over the content. (The sticky behavior exists for the landing page's
+ * pinned hero.)
  *
  * MOBILE (<lg): the header is `fixed` instead, so it's available on every
  * screen of the page, and it slides out of view while scrolling down and
  * back in while scrolling up (see useHideOnScroll). The wrapper collapses
  * to zero height there — `main`'s own top padding already accounts for it.
+ * Mobile reaches the bag through the bottom tab bar, not the header.
  *
  * `id="home"` lives on the wrapper, not the <header>: the wrapper always
  * sits at the very top of the document, so the footer's back-to-top link
@@ -28,23 +37,27 @@ import { navLinks } from "@/lib/data";
  *
  * z-50: MobileNav's full-screen panel portals to <body> at z-40 and needs
  * the toggle button inside this header to stay visible above it.
+ *
+ * The nav links use absolute "/#section" hrefs (see lib/data.ts) so they work
+ * from every page; on the landing page LenisProvider smooth-scrolls them.
  */
 export default function Header() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const hidden = useHideOnScroll(isMobile);
+  const isHome = usePathname() === "/";
 
   return (
-    <div id="home" className="lg:h-[140vh] lg:-mb-[140vh]">
+    <div id="home" className={isHome ? "lg:h-[140vh] lg:-mb-[140vh]" : undefined}>
       <header
-        className={`fixed inset-x-0 top-0 z-50 max-lg:pointer-events-none max-lg:transition-transform max-lg:duration-300 lg:sticky lg:inset-x-auto ${
-          hidden ? "-translate-y-full" : ""
-        }`}
+        className={`fixed inset-x-0 top-0 z-50 max-lg:pointer-events-none max-lg:transition-transform max-lg:duration-300 ${
+          isHome ? "lg:sticky lg:inset-x-auto" : "lg:absolute"
+        } ${hidden ? "-translate-y-full" : ""}`}
       >
         <nav className="relative flex justify-end max-w-[70.8125rem] mx-auto">
           {/* Mobile: in-flow (so the header has a real height to slide
               away by), with the header itself click-through and only the
               logo/toggle re-enabled, so the empty strip between them
-              doesn't block taps on the hero. Desktop: absolute, as before.
+              doesn't block taps on the content. Desktop: absolute, as before.
               items-center + a flex logo link (below) line the logo and the
               toggle up on one horizontal centerline. */}
           <ul className="relative lg:absolute top-0 left-0 w-full flex items-center justify-between px-6 pt-9 z-20">
@@ -79,9 +92,14 @@ export default function Header() {
               </li>
             ))}
             <li>
+              <Reveal variant="fade-left" duration={700} delay={350}>
+                <BagButton />
+              </Reveal>
+            </li>
+            <li>
               <Reveal variant="fade-left" duration={700} delay={400}>
                 <a
-                  href="#"
+                  href="/#products"
                   className="group relative flex font-light text-[0.9375rem] bg-[#1E1E21] rounded-lg w-[9.75rem] h-[3.4375rem] overflow-hidden transition-all border border-transparent hover:border-[#55555E] duration-700"
                   style={{ willChange: "transform" }}
                 >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
+import { useRouter } from "next/navigation";
 import {
   motion,
   useReducedMotion,
@@ -15,7 +16,6 @@ import ParallaxImage from "@/components/ui/ParallaxImage";
 import { BagIcon } from "@/components/icons";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
-import { useScrollToSection } from "@/lib/hooks/useScrollToSection";
 import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/constants";
 
 /**
@@ -58,6 +58,9 @@ import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/cons
  * gradient-clipped text is what left a stray gradient fragment on screen
  * during page load. Its letters rise via `top` inside a plain clipping div.
  */
+
+/** Where the hero's "Add to Bag" button goes: the hero product's page, where the color is chosen. */
+const HERO_PRODUCT_HREF = "/products/black";
 
 const HERO_DESCRIPTION =
   "Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with comfortable padded earphones, delivering first-rate playback.";
@@ -128,16 +131,17 @@ function mountIn(reduced: boolean | null, delay: number) {
  * it fills its wrapper, and its bag icon is dropped below 360px so the
  * label and price still fit.
  *
- * `onClick` is only passed by the mobile layouts, where the button takes the
- * visitor down to the Products section; the desktop buttons are unchanged.
+ * Every layout's button opens the hero product's page (HERO_PRODUCT_HREF), so
+ * the visitor picks a color there before anything goes into the bag.
  */
-function AddToBagButton({ compact = false, onClick }: { compact?: boolean; onClick?: () => void }) {
+function AddToBagButton({ compact = false }: { compact?: boolean }) {
+  const router = useRouter();
   const { isPressed, handlers } = usePressedState();
 
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => router.push(HERO_PRODUCT_HREF)}
       {...handlers}
       className={`group relative flex items-center justify-center rounded-lg overflow-hidden transition-all duration-300 ${
         compact ? "w-full h-12" : "w-[15.5rem] h-[3.4375rem]"
@@ -250,6 +254,11 @@ function HeroPinnedText({ runwayProgress }: { runwayProgress: MotionValue<number
     const [stays, ownLift] = values as [number, number];
     return stays + ownLift;
   });
+  // The button is invisible (opacity 0) until its phase begins; hiding it too
+  // keeps it from being clicked or tabbed to while you can't see it.
+  const ctaVisibility = useTransform(runwayProgress, (progress): "visible" | "hidden" =>
+    progress >= PHASE_CTA_IN[0] ? "visible" : "hidden"
+  );
 
   return (
     <div className="relative w-full">
@@ -292,7 +301,10 @@ function HeroPinnedText({ runwayProgress }: { runwayProgress: MotionValue<number
         </motion.p>
       </motion.div>
 
-      <motion.div className="mt-4 inline-block" style={{ opacity: ctaOpacity, scale: ctaScale, y: ctaY }}>
+      <motion.div
+        className="mt-4 inline-block"
+        style={{ opacity: ctaOpacity, scale: ctaScale, y: ctaY, visibility: ctaVisibility }}
+      >
         <AddToBagButton />
       </motion.div>
     </div>
@@ -469,7 +481,6 @@ function HeroMobilePinned() {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const viewportWidthRef = useRef(typeof window === "undefined" ? 0 : window.innerWidth);
-  const scrollToSection = useScrollToSection();
   const { scrollYProgress } = useScroll({
     target: runwayRef,
     offset: ["start start", "end end"],
@@ -569,7 +580,7 @@ function HeroMobilePinned() {
           className="relative z-20 mx-auto mt-6 w-[calc(100%-7.375rem)] sm:w-[22rem]"
         >
           <motion.div {...mountIn(false, 0.5)}>
-            <AddToBagButton compact onClick={() => scrollToSection("products")} />
+            <AddToBagButton compact />
           </motion.div>
         </motion.div>
       </div>
@@ -585,7 +596,6 @@ function HeroMobilePinned() {
  */
 function HeroMobileStatic() {
   const prefersReducedMotion = useReducedMotion();
-  const scrollToSection = useScrollToSection();
 
   return (
     <div className="mx-auto flex w-full max-w-[28rem] flex-col items-center text-center">
@@ -610,7 +620,7 @@ function HeroMobileStatic() {
       </motion.p>
 
       <motion.div {...mountIn(prefersReducedMotion, 0.6)} className="mt-6">
-        <AddToBagButton onClick={() => scrollToSection("products")} />
+        <AddToBagButton />
       </motion.div>
     </div>
   );
@@ -626,7 +636,7 @@ export default function Hero() {
 
   if (usePinnedSequence) {
     return (
-      <section className="px-6">
+      <section id="hero" className="px-6">
         <HeroPinnedSequence />
       </section>
     );
@@ -634,7 +644,7 @@ export default function Hero() {
 
   if (isDesktop) {
     return (
-      <section className="px-6">
+      <section id="hero" className="px-6">
         <div className="relative flex items-stretch max-w-[60.0625rem] mx-auto">
           <HeroHeadphoneImage />
           <HeroStaticText />
@@ -644,7 +654,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="px-6">
+    <section id="hero" className="px-6">
       {prefersReducedMotion || isShortScreen ? <HeroMobileStatic /> : <HeroMobilePinned />}
     </section>
   );

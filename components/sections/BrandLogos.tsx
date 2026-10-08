@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
@@ -11,11 +12,13 @@ import { brandLogos } from "@/lib/data";
  * wrapper so it retains the same horizontal inset it previously got for
  * free by being nested inside Hero's own `<section className="px-6">`.
  *
+ * Every logo links to the "Works with" page.
+ *
  * Two separate row layouts, chosen by breakpoint — only the one that applies
  * is ever mounted:
  *
- *   DESKTOP (lg+): the original row, unchanged — each logo flies in from the
- *   right and scales/fades on hover.
+ *   DESKTOP (lg+): the original row — each logo flies in from the right and
+ *   scales/fades on hover.
  *
  *   MOBILE / TABLET (<lg):
  *     - Logos are sized fluidly (18vw, capped at the original 72px) instead
@@ -33,9 +36,6 @@ import { brandLogos } from "@/lib/data";
  *     - Tap area: an invisible 12px extension above and below each logo
  *       (a pseudo-element, so it doesn't affect layout) brings the touch
  *       target to roughly 44px tall.
- *     - The links are still placeholders ("#"). Lenis deliberately ignores
- *       a bare "#", so the browser would snap the page to the top on every
- *       tap; preventDefault stops that until there are real destinations.
  *
  * The first render (before the media query resolves) is always the mobile
  * row, so the server HTML matches the client's first render; on desktop it
@@ -48,9 +48,9 @@ function DesktopBrandLogos() {
       {brandLogos.map((brand) => (
         <li key={brand.name} className="transform hover:scale-90 transition-transform duration-700">
           <Reveal variant="fade-left" duration={700} delay={brand.delay} offset={150}>
-            <a href="#" className="block max-w-[6.25rem] hover:opacity-75 transition-opacity">
+            <Link href="/works-with" className="block max-w-[6.25rem] hover:opacity-75 transition-opacity">
               <img src={brand.src} alt={brand.name} className="w-full cursor-pointer" />
-            </a>
+            </Link>
           </Reveal>
         </li>
       ))}
@@ -64,16 +64,15 @@ function MobileBrandLogo({ brand }: { brand: (typeof brandLogos)[number] }) {
   return (
     <li>
       <Reveal variant="zoom-in" duration={700} delay={brand.delay} offset={300}>
-        <a
-          href="#"
-          onClick={(event) => event.preventDefault()}
+        <Link
+          href="/works-with"
           {...handlers}
           className="relative block w-[clamp(3.25rem,18vw,4.5rem)] sm:w-[5.625rem] md:w-[6.25rem] before:absolute before:inset-x-0 before:-inset-y-3 before:content-['']"
         >
           <span className={`block transition-all duration-150 ${isPressed ? "scale-90 opacity-75" : ""}`}>
             <img src={brand.src} alt={brand.name} loading="lazy" decoding="async" className="w-full" />
           </span>
-        </a>
+        </Link>
       </Reveal>
     </li>
   );

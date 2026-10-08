@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CloseIcon, MenuIcon, ShopArrowIcon } from "@/components/icons";
 import { useLenis } from "@/components/providers/LenisProvider";
@@ -21,29 +22,25 @@ const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0
  * overlap. Tap feedback uses real pointer events (see usePressedState)
  * since `hover:` doesn't apply on touch.
  *
- * Shop has no store URL yet, so it closes the menu and takes the visitor to
- * the Products section instead (the desktop Shop button is still a
- * placeholder). preventDefault stops the bare "#" from snapping the page to
- * the top; point this at the real shop URL when there is one.
+ * Shop takes the visitor to the landing page's Products section (there is no
+ * separate shop page in this demo). The click handler is supplied by the
+ * menu, which knows whether to scroll there or navigate to it.
  */
 function ShopButton({
   duration,
   delay,
-  onNavigate,
+  onClick,
 }: {
   duration: number;
   delay: number;
-  onNavigate: () => void;
+  onClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }) {
   const { isPressed, handlers } = usePressedState();
 
   return (
     <motion.a
-      href="#"
-      onClick={(event) => {
-        event.preventDefault();
-        onNavigate();
-      }}
+      href="/#products"
+      onClick={onClick}
       {...handlers}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0, transition: { duration: duration + 0.1, delay, ease: AOS_DEFAULT_EASE } }}
@@ -94,6 +91,9 @@ export default function MobileNav() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const lenis = useLenis();
   const scrollToSection = useScrollToSection();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/";
 
   // Portals can only render after mount (no `document` on the server) —
   // gating on a mounted flag avoids a hydration mismatch.
@@ -155,22 +155,32 @@ export default function MobileNav() {
     wasOpenRef.current = isOpen;
   }, [isOpen]);
 
-  // In-page links ("/" and "#section") are scrolled by Lenis. Two things
-  // would otherwise get in the way:
+  // On the landing page, "/" and "/#section" links are scrolled by Lenis.
+  // Two things would otherwise get in the way:
   //   - Lenis ignores scrollTo() while stopped, and the menu has it stopped
   //     until the panel finishes closing — so it's restarted first.
   //   - Next's own hash/home handling would also jump the page natively.
-  //     preventDefault() makes Next's Link skip that; for "#section" links
+  //     preventDefault() makes Next's Link skip that; for "/#section" links
   //     LenisProvider's document-level click handler then does the smooth
   //     scroll, and for "/" it's done here. With Lenis off (reduced motion)
   //     nothing is intercepted and the browser/Next behave natively.
+  // On any other page the links are ordinary navigations back to the
+  // landing page, so they're left alone and the menu just closes.
   const handleNavLinkClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (lenis && (href === "/" || href.startsWith("#"))) {
+    if (lenis && isHome && (href === "/" || href.startsWith("/#"))) {
       event.preventDefault();
       lenis.start();
       if (href === "/") lenis.scrollTo(0);
     }
     setIsOpen(false);
+  };
+
+  // Shop: scroll to Products on the landing page, otherwise navigate there.
+  const handleShopClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    setIsOpen(false);
+    if (isHome) scrollToSection("products");
+    else router.push("/#products");
   };
 
   const duration = prefersReducedMotion ? 0 : 0.3;
@@ -257,10 +267,7 @@ export default function MobileNav() {
                       <ShopButton
                         duration={duration}
                         delay={baseDelay + navLinks.length * staggerDelay}
-                        onNavigate={() => {
-                          setIsOpen(false);
-                          scrollToSection("products");
-                        }}
+                        onClick={handleShopClick}
                       />
                     </div>
                   </div>

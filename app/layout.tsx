@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import MouseLightEffect from "@/components/ui/MouseLightEffect";
 import LenisProvider from "@/components/providers/LenisProvider";
+import CartProvider from "@/components/providers/CartProvider";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -19,11 +20,21 @@ const poppins = Poppins({
   display: "block",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#141415",
+};
+
 export const metadata: Metadata = {
-  title: "Beats Landing Page",
+  // Resolves the relative Open Graph image URL below. Set NEXT_PUBLIC_SITE_URL
+  // to the real domain when deploying.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  // Other screens set their own `title`; the template adds the site name.
+  title: {
+    default: "Beats Landing Page",
+    template: "%s | Beats Landing Page",
+  },
   description: "Beats headphones landing page",
   applicationName: "Beats Landing Page",
-  themeColor: "#141415",
   icons: {
     apple: "/images/favicons/apple-touch-icon.png",
     icon: [
@@ -36,7 +47,7 @@ export const metadata: Metadata = {
     description: "Beats Landing Page",
     type: "article",
     siteName: "Beats Landing Page",
-    url: "https://abidhussain.dev",
+    url: "https://jakebogan.dev",
     images: ["/images/fb-og-image.png"],
   },
 };
@@ -62,8 +73,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`max-w-full sm:max-w-none overflow-x-clip sm:overflow-x-visible ${poppins.variable}`}>
       <body className="relative light antialiase bg-[#0F0F10] font-poppins text-white overflow-x-clip">
         <LenisProvider>
-          <MouseLightEffect />
-          {children}
+          {/* CartProvider sits at the root so the bag survives moving
+              between screens (it is also what the header, tab bar and
+              mini-bag read from). */}
+          <CartProvider>
+            <MouseLightEffect />
+            {children}
+          </CartProvider>
         </LenisProvider>
       </body>
     </html>

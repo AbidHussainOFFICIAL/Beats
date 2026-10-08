@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
 import { LetterRow } from "@/components/ui/AnimatedHeading";
 import { useAosReveal } from "@/lib/hooks/useAosReveal";
 import { usePressedState } from "@/lib/hooks/usePressedState";
+import { useCart } from "@/components/providers/CartProvider";
 import { CartSmallIcon, CheckIcon } from "@/components/icons";
 import { products } from "@/lib/data";
 
@@ -127,6 +129,7 @@ function AddToBagButton({
 }
 
 function ProductCard({ product }: { product: (typeof products)[number] }) {
+  const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -141,6 +144,7 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
   }, []);
 
   const handleAddToBag = () => {
+    addItem(product.slug);
     setAdded(true);
     if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
     addedTimeoutRef.current = setTimeout(() => setAdded(false), ADDED_TO_BAG_DURATION_MS);
@@ -154,13 +158,23 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
     // caused as a side effect: the product image bleeds slightly above the
     // card's own top edge by design, which needs `overflow: visible`
     // (the default) to render uncropped — overflow-hidden was clipping it.
+    //
+    // `relative` + the empty overlay <Link> below make the whole card open
+    // the product's page without nesting the cart <button> inside an <a>
+    // (invalid HTML): the link covers the card at z-0, and the button's
+    // wrapper sits above it at z-10 so it still receives its own taps.
     <Reveal
       variant="zoom-in-up"
       duration={700}
       delay={product.delay}
       offset={300}
-      className="flex flex-col justify-end bg-[#181A1B] px-2 py-2 rounded-lg h-[9.5rem] w-[14rem] sm:w-[10.125rem] sm:mt-[6.25rem] group"
+      className="relative flex flex-col justify-end bg-[#181A1B] px-2 py-2 rounded-lg h-[9.5rem] w-[14rem] sm:w-[10.125rem] sm:mt-[6.25rem] group"
     >
+      <Link
+        href={`/products/${product.slug}`}
+        aria-label={`View Beats 3 ${product.name}`}
+        className="absolute inset-0 z-0 rounded-lg"
+      />
       <div className="flex justify-center">
         <div className="w-[5.9375rem] mb-6 group-hover:-translate-y-10 transform transition-transform duration-1000">
           <img src={product.image} alt="headphone" className="w-full" />
@@ -171,7 +185,7 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
           <span className="block text-sm font-semibold">{product.name}</span>
           <span className="block text-sm font-semibold text-[#BDC0C2]">{product.price}</span>
         </div>
-        <div className="flex items-end">
+        <div className="relative z-10 flex items-end">
           <AddToBagButton productName={product.name} added={added} onAdd={handleAddToBag} />
         </div>
       </div>
