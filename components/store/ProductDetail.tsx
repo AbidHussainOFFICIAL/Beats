@@ -35,8 +35,8 @@ function RelatedCard({ product, delay }: { product: CatalogProduct; delay: numbe
         aria-label={`View ${product.title}`}
         className="absolute inset-0 z-10 rounded-lg"
       />
-      <div className="aspect-[4/3]">
-        <TrimmedImage src={product.image} alt="" className="h-full w-full object-contain p-1" />
+      <div className="relative w-full" style={{ paddingBottom: "75%" }}>
+        <TrimmedImage src={product.image} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />
       </div>
       <p className="mt-2 line-clamp-2 text-[0.8125rem] font-semibold leading-4">{product.title}</p>
       <p className="mt-0.5 text-xs font-light text-[#BDC0C2]">{formatNaira(product.price, true)}</p>
@@ -102,7 +102,10 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-14">
         {/* Gallery */}
         <Reveal variant="zoom-in" duration={700} offset={0} className="lg:sticky lg:top-24 lg:self-start">
-          <div className="relative aspect-square overflow-hidden rounded-xl bg-[#181A1B]">
+          {/* A fixed square (padding-bottom: 100% of the width) with the image
+              laid over it absolutely, so the tile's size can never depend on
+              the image inside it — each image just fits within it. */}
+          <div className="relative w-full overflow-hidden rounded-xl bg-[#181A1B]" style={{ paddingBottom: "100%" }}>
             <AnimatePresence mode="wait" initial={false}>
               <TrimmedImage
                 key={activeSrc}
@@ -111,7 +114,7 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1, transition: { duration: 0.35, ease: AOS_DEFAULT_EASE } }}
                 exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2, ease: AOS_DEFAULT_EASE } }}
-                className="h-full w-full object-contain p-8"
+                className="absolute inset-0 h-full w-full object-contain p-6"
               />
             </AnimatePresence>
           </div>

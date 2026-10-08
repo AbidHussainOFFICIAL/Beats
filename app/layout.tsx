@@ -47,7 +47,6 @@ export const metadata: Metadata = {
     description: "Beats Landing Page",
     type: "article",
     siteName: "Beats Landing Page",
-    url: "https://jakebogan.dev",
     images: ["/images/fb-og-image.png"],
   },
 };

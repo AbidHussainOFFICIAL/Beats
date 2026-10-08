@@ -6,7 +6,9 @@ export default function ProductLoading() {
     <div className="mx-auto max-w-[60.0625rem] px-6 pt-6 lg:pt-10" aria-busy="true">
       <Skeleton className="h-4 w-48" />
       <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-14">
-        <Skeleton className="aspect-square w-full rounded-xl" />
+        <div className="relative w-full" style={{ paddingBottom: "100%" }}>
+          <Skeleton className="absolute inset-0 rounded-xl" />
+        </div>
         <div className="space-y-4">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-12 w-3/4" />

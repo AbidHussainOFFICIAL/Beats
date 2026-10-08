@@ -20,17 +20,30 @@ export function preserveScrollOnNextNavigation(): void {
   }, 1000);
 }
 
+/** The "#section" part of the link the visitor last clicked, and when. */
+const lastClick = { hash: "", at: 0 };
+/** A click older than this is no longer treated as the cause of a navigation. */
+const CLICK_MEMORY_MS = 5000;
+
 /**
  * Makes every page change start at the top of the new page.
  *
  * The header, footer and tab bar stay mounted between pages, so the browser
  * keeps the old scroll offset, and Next only scrolls to the top when the new
- * page's first element is off-screen — which leaves short pages opening
- * part-way down. This forces the top itself (through Lenis too, so its
- * internal position doesn't snap back). It deliberately does nothing for:
+ * page's first element is off-screen. This forces the top itself (through
+ * Lenis too, so its internal position doesn't snap back), and checks once
+ * more on the next frame in case something nudged it in between. It
+ * deliberately does nothing for:
  *   - the first load (so refreshing keeps the browser's own restore),
- *   - links with a hash (e.g. "/#products"), which scroll to their section,
+ *   - links that point at a "#section" (e.g. "/#products"), which scroll to
+ *     that section instead,
  *   - navigations flagged with preserveScrollOnNextNavigation().
+ *
+ * "Is this a hash link?" comes from the clicked link itself, NOT from
+ * window.location: when this runs right after a page change, the address bar
+ * may not have been updated yet, so it can still show the PREVIOUS page's
+ * "#hash" — which used to make the reset skip itself after arriving through
+ * a "/#products" link.
  */
 export default function ScrollToTop() {
   const pathname = usePathname();
@@ -38,17 +51,50 @@ export default function ScrollToTop() {
   const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target;
+      const anchor = target instanceof Element ? target.closest<HTMLAnchorElement>("a[href]") : null;
+      let hash = "";
+      if (anchor) {
+        try {
+          const url = new URL(anchor.href, window.location.href);
+          if (url.origin === window.location.origin) hash = url.hash;
+        } catch {
+          // Not a parseable URL — treat it as having no hash.
+        }
+      }
+      lastClick.hash = hash;
+      lastClick.at = Date.now();
+    };
+
+    // Capture phase, so it runs before any link's own handler and the stored
+    // value is already in place when the navigation completes.
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
+  }, []);
+
+  useEffect(() => {
     if (previousPathnameRef.current === pathname) return;
     previousPathnameRef.current = pathname;
+
+    const clickedHash = Date.now() - lastClick.at < CLICK_MEMORY_MS ? lastClick.hash : "";
+    lastClick.hash = "";
 
     if (preserveNext) {
       preserveNext = false;
       return;
     }
-    if (window.location.hash) return;
+    if (clickedHash) return;
 
-    window.scrollTo(0, 0);
-    lenis?.scrollTo(0, { immediate: true });
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      lenis?.scrollTo(0, { immediate: true });
+    };
+    resetScroll();
+    const frameId = requestAnimationFrame(() => {
+      if (window.scrollY > 0) resetScroll();
+    });
+    return () => cancelAnimationFrame(frameId);
   }, [pathname, lenis]);
 
   return null;

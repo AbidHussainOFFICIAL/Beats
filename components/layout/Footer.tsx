@@ -147,7 +147,8 @@ function FooterAccordionSection({ title, links }: { title: string; links: Footer
 /**
  * Every footer link is a real destination now (see lib/data.ts), rendered
  * with Next's <Link> so moving between pages is instant instead of a full
- * page reload. The logo, socials, back-to-top and credit links are unchanged.
+ * page reload. The logo, socials and back-to-top links are unchanged; the
+ * credit line is plain text.
  */
 export default function Footer() {
   return (
@@ -257,17 +258,7 @@ export default function Footer() {
             staggered in. delay=400 continues that same sequence, landing
             just after back-to-top (350) as the last item to appear. */}
         <Reveal variant="fade-up" duration={700} delay={400} anchorPlacement="top-bottom">
-          <p className="text-[#A2A6A9] text-center font-light text-[0.8125rem]">
-            Created By{" "}
-            <a
-              href="https://jakebogan.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-underline text-[#A2A6A9] hover:text-white transition-colors pb-0.5"
-            >
-              Jake Bogan
-            </a>
-          </p>
+          <p className="text-[#A2A6A9] text-center font-light text-[0.8125rem]">Created By Abid Hussain</p>
         </Reveal>
       </div>
     </footer>
