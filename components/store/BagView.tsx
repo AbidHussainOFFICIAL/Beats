@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
@@ -9,11 +10,10 @@ import QuantityStepper from "@/components/ui/QuantityStepper";
 import Skeleton from "@/components/ui/Skeleton";
 import TrimmedImage from "@/components/ui/TrimmedImage";
 import EmptyState from "@/components/store/EmptyState";
+import PriceTag from "@/components/store/PriceTag";
 import { TrashIcon } from "@/components/icons/store";
 import { useCart, type CartLine } from "@/components/providers/CartProvider";
 import { FREE_STANDARD_SHIPPING_FROM, formatNaira } from "@/lib/catalog";
-
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 function BagLine({
   line,
@@ -57,7 +57,9 @@ function BagLine({
                 />
                 {product.name}
               </p>
-              <p className="mt-1 text-[0.8125rem] font-light text-[#BDC0C2]">{formatNaira(product.price)} each</p>
+              <div className="mt-1">
+                <PriceTag product={product} size="sm" />
+              </div>
             </div>
             <p className="shrink-0 text-base font-semibold">{formatNaira(product.price * quantity)}</p>
           </div>
@@ -92,7 +94,7 @@ function BagSkeleton() {
 }
 
 export default function BagView() {
-  const { hydrated, lines, count, subtotal, setQuantity, removeItem } = useCart();
+  const { hydrated, lines, count, subtotal, savings, setQuantity, removeItem } = useCart();
 
   const freeShippingProgress = Math.min(subtotal / FREE_STANDARD_SHIPPING_FROM, 1);
   const remainingForFreeShipping = Math.max(FREE_STANDARD_SHIPPING_FROM - subtotal, 0);
@@ -135,6 +137,12 @@ export default function BagView() {
                 </dt>
                 <dd className="font-semibold">{formatNaira(subtotal)}</dd>
               </div>
+              {savings > 0 && (
+                <div className="flex items-center justify-between">
+                  <dt className="font-light text-[#BDC0C2]">You&apos;re saving</dt>
+                  <dd className="font-semibold">{formatNaira(savings)}</dd>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <dt className="font-light text-[#BDC0C2]">Shipping</dt>
                 <dd className="font-light text-[#BDC0C2]">Chosen at checkout</dd>

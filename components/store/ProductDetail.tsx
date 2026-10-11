@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
@@ -10,6 +10,8 @@ import QuantityStepper from "@/components/ui/QuantityStepper";
 import TrimmedImage, { preloadTrimmedImage } from "@/components/ui/TrimmedImage";
 import { preserveScrollOnNextNavigation } from "@/components/layout/ScrollToTop";
 import DeliveryWindow from "@/components/store/DeliveryWindow";
+import PriceTag from "@/components/store/PriceTag";
+import ColorSheet from "@/components/store/ColorSheet";
 import { useCart } from "@/components/providers/CartProvider";
 import { CheckIcon } from "@/components/icons";
 import { ChevronRightIcon, TruckIcon } from "@/components/icons/store";
@@ -21,9 +23,10 @@ import {
   getRelatedProducts,
   type CatalogProduct,
 } from "@/lib/catalog";
+import { usePressedState } from "@/lib/hooks/usePressedState";
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { specs } from "@/lib/data";
 
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 const ADDED_CONFIRMATION_MS = 1600;
 
 /** A smaller product card for the "You may also like" row. The whole card is one link (an empty overlay link, so the text inside stays plain). */
@@ -39,8 +42,48 @@ function RelatedCard({ product, delay }: { product: CatalogProduct; delay: numbe
         <TrimmedImage src={product.image} alt="" className="absolute inset-0 h-full w-full object-contain p-1" />
       </div>
       <p className="mt-2 line-clamp-2 text-[0.8125rem] font-semibold leading-4">{product.title}</p>
-      <p className="mt-0.5 text-xs font-light text-[#BDC0C2]">{formatNaira(product.price, true)}</p>
+      <div className="mt-1">
+        <PriceTag product={product} size="sm" short />
+      </div>
     </Reveal>
+  );
+}
+
+/** The mobile "Color: Black — Change" row that opens the color sheet. */
+function ColorTrigger({
+  product,
+  expanded,
+  onOpen,
+  buttonRef,
+}: {
+  product: CatalogProduct;
+  expanded: boolean;
+  onOpen: () => void;
+  buttonRef: RefObject<HTMLButtonElement>;
+}) {
+  const { isPressed, handlers } = usePressedState();
+
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      onClick={onOpen}
+      aria-haspopup="dialog"
+      aria-expanded={expanded}
+      {...handlers}
+      className={`mt-3 flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors duration-200 lg:hidden ${
+        isPressed ? "bg-[#2A2A2E]" : "bg-[#181A1B]"
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className="h-9 w-9 shrink-0 rounded-full border border-white/20"
+        style={{ background: product.swatch }}
+      />
+      <span className="min-w-0 flex-1 text-sm font-semibold">{product.name}</span>
+      <span className="text-[0.8125rem] font-light text-[#BDC0C2]">Change</span>
+      <ChevronRightIcon className="h-4 w-4 -rotate-90 text-[#BDC0C2]" />
+    </button>
   );
 }
 
@@ -50,7 +93,9 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [justAdded, setJustAdded] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const colorTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Same reasoning as every other timer in this app: a raw setTimeout isn't
   // tied to the component's lifecycle, so clear it on unmount.
@@ -69,6 +114,12 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
   const related = getRelatedProducts(product.slug, 3);
   const activeSrc = product.gallery[activeImage] ?? product.image;
   const isHeadphones = product.kind === "headphones";
+
+  const closeSheet = useCallback(() => {
+    setSheetOpen(false);
+    // Hand focus back to the button that opened the sheet.
+    colorTriggerRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const handleAddToBag = () => {
     addItem(product.slug, quantity);
@@ -144,13 +195,14 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
         <div>
           <Reveal variant="fade-up" duration={700} offset={0}>
             <p className="text-sm font-light text-[#BDC0C2]">{product.family}</p>
-            {/* The global h1 rule paints headings in a near-invisible gradient
-                (the landing page's decorative look). This is the page's real
-                title, so those fills are cancelled to keep it plain white. */}
-            <h1 className="mt-1 text-[2.25rem] font-semibold leading-tight md:text-[3rem] [background:none] [-webkit-text-fill-color:#ffffff]">
+            {/* text-white: the global h1 rule colors headings the dim
+                decorative grey; this is the page's real title. */}
+            <h1 className="mt-1 text-[2.25rem] font-semibold leading-tight text-white md:text-[3rem]">
               {product.title}
             </h1>
-            <p className="mt-3 text-2xl font-semibold">{formatNaira(product.price)}</p>
+            <div className="mt-3">
+              <PriceTag product={product} size="lg" />
+            </div>
             <p className="mt-4 max-w-[28rem] text-[0.9375rem] font-light leading-7 text-[#BDC0C2]">
               {product.description}
             </p>
@@ -161,7 +213,9 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
               <p className="text-sm font-light text-[#BDC0C2]">
                 Color: <span className="font-semibold text-white">{product.name}</span>
               </p>
-              <ul className="mt-3 flex flex-wrap gap-3">
+
+              {/* Desktop: the swatches sit inline. */}
+              <ul className="mt-3 hidden flex-wrap gap-3 lg:flex">
                 {variants.map((variant) => {
                   const selected = variant.slug === product.slug;
                   return (
@@ -174,7 +228,9 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
                         aria-label={variant.name}
                         aria-current={selected ? "true" : undefined}
                         className={`block h-9 w-9 rounded-full border border-white/20 transition-shadow ${
-                          selected ? "ring-2 ring-white ring-offset-2 ring-offset-[#0F0F10]" : "hover:ring-2 hover:ring-white/40 hover:ring-offset-2 hover:ring-offset-[#0F0F10]"
+                          selected
+                            ? "ring-2 ring-white ring-offset-2 ring-offset-[#0F0F10]"
+                            : "hover:ring-2 hover:ring-white/40 hover:ring-offset-2 hover:ring-offset-[#0F0F10]"
                         }`}
                         style={{ background: variant.swatch }}
                       />
@@ -182,6 +238,14 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
                   );
                 })}
               </ul>
+
+              {/* Mobile: one row that opens the color sheet. */}
+              <ColorTrigger
+                product={product}
+                expanded={sheetOpen}
+                onOpen={() => setSheetOpen(true)}
+                buttonRef={colorTriggerRef}
+              />
             </Reveal>
           )}
 
@@ -303,6 +367,8 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
           ))}
         </div>
       </section>
+
+      <ColorSheet open={sheetOpen} onClose={closeSheet} current={product} variants={variants} />
     </div>
   );
 }

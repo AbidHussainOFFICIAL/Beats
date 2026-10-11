@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,7 +11,6 @@ import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { getProduct } from "@/lib/catalog";
 
 const TOAST_DURATION_MS = 3200;
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /**
  * The mobile "Added to bag" confirmation: a small card above the tab bar

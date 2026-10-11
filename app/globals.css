@@ -174,18 +174,22 @@ img {
   overflow: hidden;
 }
 
+/*
+  The big decorative titles (Specs, Case, "On ear"…) are one solid grey, not
+  gradient-clipped text. Two reasons:
+    - Contrast: the old gradient was nearly invisible (about 1.2:1 against the
+      page); this grey is about 3.9:1, above the 3:1 WCAG asks of large text.
+    - Stability: `background-clip: text` is what left stray fragments on screen
+      while the per-letter spans animated in, and made transforms near the
+      heading render a misplaced glyph.
+  Headings that need to be white (a product's own title) set `text-white`,
+  which wins over this element rule.
+*/
 h1,
-h1 span {
-  background: -webkit-linear-gradient(#363436, #292a2b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+h1 span,
 h2,
 h2 span {
-  background: -webkit-linear-gradient(#3b3b40, #141415);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #707078;
 }
 
 /* Mouse-follow light glow, driven by --mouse-x / --mouse-y set in MouseLight.tsx */
@@ -238,6 +242,17 @@ header ul li .nav-underline:before {
   .logo:hover .logo-svg {
     transform: rotateY(180deg);
   }
+}
+
+/*
+  Keyboard focus: a clear white outline on whatever has focus — but only when
+  it was reached by keyboard (:focus-visible), so mouse clicks on buttons and
+  links don't draw one. Declared after Tailwind's utilities so it also beats
+  classes like `outline-none` on inputs, which would otherwise hide it.
+*/
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
 }
 
 /* Respect reduced motion preference for all Framer Motion driven elements */

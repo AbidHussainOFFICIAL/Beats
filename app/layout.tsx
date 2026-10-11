@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import MouseLightEffect from "@/components/ui/MouseLightEffect";
+import MotionProvider from "@/components/providers/MotionProvider";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CartProvider from "@/components/providers/CartProvider";
+import { SITE_AUTHOR, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,16 +27,23 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  // Resolves the relative Open Graph image URL below. Set NEXT_PUBLIC_SITE_URL
-  // to the real domain when deploying.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  // Resolves every relative URL in the metadata (share images, canonical
+  // links). Set NEXT_PUBLIC_SITE_URL to the real domain when deploying.
+  metadataBase: new URL(SITE_URL),
   // Other screens set their own `title`; the template adds the site name.
   title: {
-    default: "Beats Landing Page",
-    template: "%s | Beats Landing Page",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "Beats headphones landing page",
-  applicationName: "Beats Landing Page",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_AUTHOR }],
+  creator: SITE_AUTHOR,
+  formatDetection: { telephone: false },
+  // When saved to an iPhone's home screen: open full-screen, with a normal
+  // (non-overlapping) black status bar. (The manifest in app/manifest.ts
+  // covers Android and desktop.)
+  appleWebApp: { capable: true, title: "Beats", statusBarStyle: "black" },
   icons: {
     apple: "/images/favicons/apple-touch-icon.png",
     icon: [
@@ -43,10 +52,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Beats Landing Page",
-    description: "Beats Landing Page",
-    type: "article",
-    siteName: "Beats Landing Page",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    type: "website",
+    siteName: SITE_NAME,
+    images: [{ url: "/images/fb-og-image.png", width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     images: ["/images/fb-og-image.png"],
   },
 };
@@ -70,16 +85,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // Firefox 102+/Chrome 90+ — unlike `hidden`, which has no such floor;
     // fine for this stack.)
     <html lang="en" className={`max-w-full sm:max-w-none overflow-x-clip sm:overflow-x-visible ${poppins.variable}`}>
-      <body className="relative light antialiase bg-[#0F0F10] font-poppins text-white overflow-x-clip">
-        <LenisProvider>
-          {/* CartProvider sits at the root so the bag survives moving
-              between screens (it is also what the header, tab bar and
-              mini-bag read from). */}
-          <CartProvider>
-            <MouseLightEffect />
-            {children}
-          </CartProvider>
-        </LenisProvider>
+      <body className="relative light antialiased bg-[#0F0F10] font-poppins text-white overflow-x-clip">
+        {/* MotionProvider: every animation honors "reduce motion".
+            CartProvider sits at the root so the bag survives moving between
+            screens (it is also what the header, tab bar and mini-bag read
+            from). */}
+        <MotionProvider>
+          <LenisProvider>
+            <CartProvider>
+              <MouseLightEffect />
+              {children}
+            </CartProvider>
+          </LenisProvider>
+        </MotionProvider>
       </body>
     </html>
   );

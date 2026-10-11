@@ -3,9 +3,7 @@
 import { motion } from "framer-motion";
 import type { ElementType, ReactNode } from "react";
 import { useAosReveal } from "@/lib/hooks/useAosReveal";
-
-// AOS's default easing is CSS "ease" — cubic-bezier(0.25, 0.1, 0.25, 1.0).
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 
 export interface HeadingLetter {
   char: ReactNode;

@@ -4,7 +4,10 @@
  * params, metadata) and client components alike.
  *
  * The prices, "what's in the box" list and the case are DEMO placeholders;
- * swap in the real values here and every screen updates.
+ * swap in the real values here and every screen updates. Every product has a
+ * current (sale) `price` and the original `compareAtPrice` it's reduced from —
+ * the landing page's "up to N% off" banner reads the biggest of those
+ * discounts (MAX_DISCOUNT_PERCENT), so it can never claim more than is true.
  */
 
 /** Most units of one item a single bag line can hold. */
@@ -21,8 +24,10 @@ export interface CatalogProduct {
   name: string;
   /** Full display name, e.g. "Beats 3 Black". */
   title: string;
-  /** Unit price in naira. */
+  /** Current unit price in naira (the sale price). */
   price: number;
+  /** The original price before the sale. Equal to `price` when not on sale. */
+  compareAtPrice: number;
   image: string;
   /** Every image shown in the product page's gallery (the first is `image`). */
   gallery: string[];
@@ -36,6 +41,7 @@ export interface CatalogProduct {
 }
 
 const HEADPHONE_PRICE = 299000;
+const HEADPHONE_COMPARE_AT_PRICE = 399000;
 
 const HEADPHONE_DESCRIPTION =
   "Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with comfortable padded earphones, delivering first-rate playback.";
@@ -71,6 +77,7 @@ function headphone(config: {
     name: config.name,
     title: `Beats 3 ${config.name}`,
     price: HEADPHONE_PRICE,
+    compareAtPrice: HEADPHONE_COMPARE_AT_PRICE,
     image: config.image,
     gallery: config.gallery ?? [config.image],
     swatch: config.swatch,
@@ -103,19 +110,19 @@ export const catalog: CatalogProduct[] = [
   headphone({
     slug: "blue",
     name: "Blue",
-    swatch: "#2457D6",
+    swatch: "#1F3F9E",
     image: "/images/content/headphone-3.png",
   }),
   headphone({
     slug: "twilight-grey",
     name: "Twilight Grey",
-    swatch: "#6E727D",
+    swatch: "linear-gradient(135deg, #3A3C42 50%, #E8D5B5 50%)",
     image: "/images/content/headphone-4.png",
   }),
   headphone({
     slug: "night-black",
     name: "Night Black",
-    swatch: "#0B0B0C",
+    swatch: "linear-gradient(135deg, #111112 50%, #C8782E 50%)",
     image: "/images/content/headphone-5.png",
   }),
   {
@@ -124,7 +131,8 @@ export const catalog: CatalogProduct[] = [
     family: "Accessories",
     name: "Case",
     title: "Beats 3 Case",
-    price: 49000,
+    price: 42000,
+    compareAtPrice: 70000,
     image: "/images/content/case-headphone-case-bkg.png",
     gallery: ["/images/content/case-headphone-case-bkg.png"],
     swatch: "#1A1A1C",
@@ -139,6 +147,15 @@ export const catalog: CatalogProduct[] = [
 export function getProduct(slug: string): CatalogProduct | undefined {
   return catalog.find((product) => product.slug === slug);
 }
+
+/** Percent off the original price, rounded (0 when the product isn't on sale). */
+export function discountPercent(product: CatalogProduct): number {
+  if (product.compareAtPrice <= product.price) return 0;
+  return Math.round((1 - product.price / product.compareAtPrice) * 100);
+}
+
+/** The biggest discount in the catalog — what "up to N% off" can honestly claim. */
+export const MAX_DISCOUNT_PERCENT = Math.max(0, ...catalog.map(discountPercent));
 
 /** The other colors of the same headphone (including the product itself). */
 export function getColorVariants(product: CatalogProduct): CatalogProduct[] {

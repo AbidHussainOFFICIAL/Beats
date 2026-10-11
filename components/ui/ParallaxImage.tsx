@@ -4,6 +4,7 @@ import {
   motion,
   useMotionValue,
   useMotionValueEvent,
+  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -75,6 +76,9 @@ interface ParallaxImageProps extends Omit<HTMLMotionProps<"img">, "style" | "ref
  * setting — simpleParallax didn't apply scroll position directly, it eased toward
  * it, which is what gave the drift its smooth, slightly-lagging feel.
  *
+ * Visitors who ask for reduced motion get a still image: the drift/rotation
+ * is simply not applied.
+ *
  * NOTE on props typing: this intentionally extends framer-motion's own
  * `HTMLMotionProps<"img">` rather than React's `ImgHTMLAttributes<HTMLImageElement>`,
  * since the two disagree on several event handler signatures.
@@ -92,6 +96,7 @@ export default function ParallaxImage({
   ...imageProps
 }: ParallaxImageProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress: elementRelativeProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -168,7 +173,11 @@ export default function ParallaxImage({
 
   return (
     <div ref={ref} className={wrapperClassName}>
-      <motion.img {...imageProps} style={{ x, y, rotate, willChange: "transform" }} className={className} />
+      <motion.img
+        {...imageProps}
+        style={prefersReducedMotion ? undefined : { x, y, rotate, willChange: "transform" }}
+        className={className}
+      />
     </div>
   );
 }

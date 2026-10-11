@@ -72,6 +72,8 @@ export interface Order {
   subtotal: number;
   shipping: number;
   total: number;
+  /** How much the shopper saved compared with the original prices (absent on orders saved before sales existed). */
+  savings?: number;
 }
 
 interface AddedSignal {
@@ -86,6 +88,8 @@ interface CartContextValue {
   /** Total number of units in the bag. */
   count: number;
   subtotal: number;
+  /** How much the bag saves compared with the original (pre-sale) prices. */
+  savings: number;
   /** Pass `silent` to skip the flyout / toast (e.g. for "Buy now"). */
   addItem: (slug: string, quantity?: number, options?: { silent?: boolean }) => void;
   setQuantity: (slug: string, quantity: number) => void;
@@ -182,6 +186,14 @@ export default function CartProvider({ children }: { children: ReactNode }) {
     () => lines.reduce((total, line) => total + line.product.price * line.quantity, 0),
     [lines]
   );
+  const savings = useMemo(
+    () =>
+      lines.reduce(
+        (total, line) => total + Math.max(line.product.compareAtPrice - line.product.price, 0) * line.quantity,
+        0
+      ),
+    [lines]
+  );
 
   const addItem = useCallback(
     (slug: string, quantity = 1, options?: { silent?: boolean }) => {
@@ -228,13 +240,14 @@ export default function CartProvider({ children }: { children: ReactNode }) {
         subtotal,
         shipping,
         total: subtotal + shipping,
+        savings,
       };
       setOrder(placed);
       setItems([]);
       setMiniBagOpen(false);
       return placed;
     },
-    [lines, subtotal]
+    [lines, subtotal, savings]
   );
 
   const value = useMemo<CartContextValue>(
@@ -243,6 +256,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       lines,
       count,
       subtotal,
+      savings,
       addItem,
       setQuantity,
       removeItem,
@@ -252,7 +266,7 @@ export default function CartProvider({ children }: { children: ReactNode }) {
       miniBagOpen,
       setMiniBagOpen,
     }),
-    [hydrated, lines, count, subtotal, addItem, setQuantity, removeItem, order, placeOrder, addedSignal, miniBagOpen]
+    [hydrated, lines, count, subtotal, savings, addItem, setQuantity, removeItem, order, placeOrder, addedSignal, miniBagOpen]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

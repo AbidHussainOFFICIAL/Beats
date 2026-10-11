@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { MouseEventHandler, PointerEventHandler, ReactNode, Ref } from "react";
 import { useAosReveal, type AnchorPlacement } from "@/lib/hooks/useAosReveal";
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 
 export type RevealVariant =
   | "fade-up"
@@ -81,9 +82,6 @@ const hiddenStateFor = (variant: RevealVariant) => {
       return { opacity: 0 };
   }
 };
-
-// AOS's default easing is CSS "ease", i.e. cubic-bezier(0.25, 0.1, 0.25, 1.0).
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 export default function Reveal({
   children,

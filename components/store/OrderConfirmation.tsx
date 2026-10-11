@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
@@ -12,8 +13,6 @@ import EmptyState from "@/components/store/EmptyState";
 import { CheckCircleIcon } from "@/components/icons/store";
 import { useCart } from "@/components/providers/CartProvider";
 import { deliveryWindowLabel, formatNaira } from "@/lib/catalog";
-
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /** A label/value pair inside the confirmation's detail cards. */
 function Detail({ label, children }: { label: string; children: ReactNode }) {
@@ -114,6 +113,12 @@ export default function OrderConfirmation() {
               <dt className="font-light text-[#BDC0C2]">Subtotal</dt>
               <dd className="font-semibold">{formatNaira(order.subtotal)}</dd>
             </div>
+            {(order.savings ?? 0) > 0 && (
+              <div className="flex items-center justify-between">
+                <dt className="font-light text-[#BDC0C2]">You saved</dt>
+                <dd className="font-semibold">{formatNaira(order.savings ?? 0)}</dd>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <dt className="font-light text-[#BDC0C2]">{order.deliveryLabel}</dt>
               <dd className="font-semibold">{order.shipping === 0 ? "Free" : formatNaira(order.shipping)}</dd>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,8 +12,6 @@ import { TrashIcon } from "@/components/icons/store";
 import { useCart } from "@/components/providers/CartProvider";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { formatNaira } from "@/lib/catalog";
-
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /**
  * The desktop mini-bag flyout, anchored under the header at the right. It

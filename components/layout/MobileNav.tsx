@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -11,9 +12,6 @@ import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { useScrollToSection } from "@/lib/hooks/useScrollToSection";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { navLinks } from "@/lib/data";
-
-// Matches AOS's default easing (CSS "ease"), same as Reveal.tsx/AnimatedHeading.
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /**
  * Shop button: a plain flex row — the label takes all the space left of the

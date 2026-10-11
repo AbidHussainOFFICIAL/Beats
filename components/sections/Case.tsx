@@ -7,11 +7,11 @@ import ScrollRevealImage from "@/components/ui/ScrollRevealImage";
 import { InfoIcon } from "@/components/icons";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
+import { getProduct } from "@/lib/catalog";
 
 const CASE_LETTERS = ["C", "a", "s", "e"];
 
-const CASE_DESCRIPTION =
-  "With a comfortable and adaptable case so that you can store it whenever you want, and keep your durability forever.";
+const CASE_DESCRIPTION = getProduct("case")?.description ?? "";
 
 /**
  * Two body layouts under the shared heading, chosen at the `sm` (640px)

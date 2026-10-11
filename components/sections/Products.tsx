@@ -183,7 +183,12 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
       <div className="flex justify-between">
         <div className="flex flex-col">
           <span className="block text-sm font-semibold">{product.name}</span>
-          <span className="block text-sm font-semibold text-[#BDC0C2]">{product.price}</span>
+          <span className="block text-sm font-semibold text-[#BDC0C2]">
+            {product.price}
+            {product.compareAt && (
+              <span className="ml-1.5 text-xs font-light text-[#8E9296] line-through">{product.compareAt}</span>
+            )}
+          </span>
         </div>
         <div className="relative z-10 flex items-end">
           <AddToBagButton productName={product.name} added={added} onAdd={handleAddToBag} />

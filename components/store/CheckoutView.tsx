@@ -72,7 +72,7 @@ function CheckoutSkeleton() {
 
 export default function CheckoutView() {
   const router = useRouter();
-  const { hydrated, lines, count, subtotal, placeOrder } = useCart();
+  const { hydrated, lines, count, subtotal, savings, placeOrder } = useCart();
   // True from the moment the order is placed until the confirmation screen
   // takes over — placing the order empties the bag, which would otherwise
   // flash the "bag is empty" screen in between.
@@ -232,6 +232,12 @@ export default function CheckoutView() {
                 <dt className="font-light text-[#BDC0C2]">Subtotal</dt>
                 <dd className="font-semibold">{formatNaira(subtotal)}</dd>
               </div>
+              {savings > 0 && (
+                <div className="flex items-center justify-between">
+                  <dt className="font-light text-[#BDC0C2]">You&apos;re saving</dt>
+                  <dd className="font-semibold">{formatNaira(savings)}</dd>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <dt className="font-light text-[#BDC0C2]">Shipping</dt>
                 <dd className="font-semibold">{shipping === 0 ? "Free" : formatNaira(shipping)}</dd>

@@ -30,7 +30,7 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(function FormFiel
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={`field-input w-full rounded-lg border bg-[#0F0F10] px-3 py-3 text-sm font-light text-white placeholder-[#6B6B70] outline-none transition-colors focus:ring-0 ${
+        className={`field-input w-full rounded-lg border bg-[#0F0F10] px-3 py-3 text-sm font-light text-white placeholder-[#8E9296] outline-none transition-colors focus:ring-0 ${
           error ? "border-red-400/70 focus:border-red-400" : "border-[#2A2A2E] focus:border-white/40"
         } ${className}`}
         {...inputProps}

@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +18,7 @@ import { BagIcon } from "@/components/icons";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/constants";
+import { formatNaira, getProduct } from "@/lib/catalog";
 
 /**
  * Layouts, chosen in `Hero` at the bottom — only the one that applies is
@@ -46,28 +48,22 @@ import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/cons
  * continues into Specs. The headphone image's own parallax drift is
  * sequenced to start only after the runway ends (see ParallaxImage).
  *
- * "On ear" SPACING NOTE: the "On ear" heading carries a webkit gradient-text
- * effect (see globals.css h1/h1-span gradient rules). Applying any
- * `transform` to that element OR to a wrapper immediately around it can
- * produce a rendering glitch (a single oversized, misplaced glyph). Spacing
- * around it is therefore done with margins on its neighbors, and the mobile
- * layouts only ever fade it with `opacity` and position it with plain
- * `top`/`inset` offsets — never transforms. The mobile heading goes further:
- * it doesn't use the gradient-clipped text at all (see
- * MOBILE_HEADING_SOLID_FILL), because animating per-letter spans inside
- * gradient-clipped text is what left a stray gradient fragment on screen
- * during page load. Its letters rise via `top` inside a plain clipping div.
+ * "On ear" SPACING NOTE: the heading used to be gradient-clipped text
+ * (`background-clip: text`), which left stray fragments on screen while its
+ * per-letter spans animated, and made any `transform` on or around it render
+ * a single oversized, misplaced glyph. Headings are now a plain solid color
+ * (see globals.css), which removes the cause. Spacing around the heading is
+ * still done with margins on its neighbors, and the mobile layouts still only
+ * fade it with `opacity` and position it with plain `top`/`inset` offsets;
+ * the mobile letters rise via `top` inside a plain clipping div.
  */
 
-/** Where the hero's "Add to Bag" button goes: the hero product's page, where the color is chosen. */
-const HERO_PRODUCT_HREF = "/products/black";
+/** The hero product: where its "Add to Bag" button goes (to choose a color) and which price it shows. */
+const HERO_PRODUCT_SLUG = "black";
+const HERO_PRODUCT_HREF = `/products/${HERO_PRODUCT_SLUG}`;
+const HERO_PRICE_LABEL = formatNaira(getProduct(HERO_PRODUCT_SLUG)?.price ?? 0, true);
 
-const HERO_DESCRIPTION =
-  "Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with comfortable padded earphones, delivering first-rate playback.";
-
-// Matches AOS's default easing (CSS "ease"), same as Reveal.tsx/AnimatedHeading —
-// used for the one-time page-load entrances below.
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
+const HERO_DESCRIPTION = getProduct(HERO_PRODUCT_SLUG)?.description ?? "";
 
 // --- Desktop pinned sequence phases (progress through the runway, 0→1) ---
 const PHASE_FADE_OUT: [number, number] = [0.3, 0.55];
@@ -102,14 +98,6 @@ const MOBILE_HEADING_LETTERS = [
   { char: "a", delay: 150 },
   { char: "r", delay: 150 },
 ];
-
-/** Cancels globals.css's gradient-text rule (`h1, h1 span` with
- * background-clip: text) for the mobile heading and paints it in one solid
- * color instead — the midpoint of that gradient (#363436 → #292a2b), so it
- * looks the same. The gradient-clipped text is what left a stray fragment on
- * screen while the per-letter spans animated in; without background-clip: text
- * there is nothing to glitch. Applied to the <h1> and to every letter span. */
-const MOBILE_HEADING_SOLID_FILL = "[background:none] [-webkit-text-fill-color:#302f30]";
 
 /** Props for a one-time fade-and-rise on mount; nothing at all under reduced motion. */
 function mountIn(reduced: boolean | null, delay: number) {
@@ -153,7 +141,7 @@ function AddToBagButton({ compact = false }: { compact?: boolean }) {
         }`}
       />
       <span className={`cursor-pointer ${compact ? "text-[0.8125rem]" : "text-[0.9375rem]"}`}>Add to Bag</span>
-      <span className={`font-bold cursor-pointer ${compact ? "ml-2 text-sm" : "ml-4 text-xl"}`}>N399k</span>
+      <span className={`font-bold cursor-pointer ${compact ? "ml-2 text-sm" : "ml-4 text-xl"}`}>{HERO_PRICE_LABEL}</span>
     </button>
   );
 }
@@ -364,10 +352,9 @@ function HeroPinnedSequence() {
  * so it fits from 320px phones up.
  *
  * The heading's letters rise into place one by one on load, using `top`
- * instead of the transforms the desktop heading uses, and are painted in a
- * solid color instead of gradient-clipped text (see the note at the top of
- * this file). Kerning is done with letter-spacing and an em-wide gap for the
- * space, so it scales with the fluid size.
+ * instead of the transforms the desktop heading uses (see the note at the top
+ * of this file). Kerning is done with letter-spacing and an em-wide gap for
+ * the space, so it scales with the fluid size.
  *
  * Both mobile layouts use this; the pinned one passes a scroll-driven
  * heading opacity, a scroll-driven transform for the image, and its text
@@ -393,12 +380,12 @@ function MobilePoster({
           fight over the same property. Each letter rises by animating
           `top` (a layout property, in em so it scales with the fluid font
           size) rather than a transform, and the clip is on a plain div —
-          never on the gradient text itself. */}
+          never on the heading text itself. */}
       <motion.div style={{ opacity: headingOpacity }} className="absolute inset-x-0 top-[18%] z-0">
         <div className="overflow-hidden">
           <h1
             aria-label="On ear"
-            className={`whitespace-nowrap text-center text-[clamp(4.25rem,26vw,7rem)] font-semibold leading-[1.1] tracking-[-0.03em] ${MOBILE_HEADING_SOLID_FILL}`}
+            className="whitespace-nowrap text-center text-[clamp(4.25rem,26vw,7rem)] font-semibold leading-[1.1] tracking-[-0.03em]"
           >
             {MOBILE_HEADING_LETTERS.map((letter, i) => (
               <motion.span
@@ -410,7 +397,7 @@ function MobilePoster({
                   top: "0em",
                   transition: { duration: 0.8, delay: 0.15 + letter.delay / 1000, ease: AOS_DEFAULT_EASE },
                 }}
-                className={`relative inline-block ${MOBILE_HEADING_SOLID_FILL} ${letter.char === " " ? "w-[0.3em]" : ""}`}
+                className={`relative inline-block ${letter.char === " " ? "w-[0.3em]" : ""}`}
               >
                 {letter.char === " " ? "\u00a0" : letter.char}
               </motion.span>

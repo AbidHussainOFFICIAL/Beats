@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useScroll, useTransform, type HTMLMotionProps } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform, type HTMLMotionProps } from "framer-motion";
 import { useAosReveal } from "@/lib/hooks/useAosReveal";
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 
 interface ScrollRevealImageProps extends Omit<HTMLMotionProps<"img">, "style" | "ref"> {
   /** px offset to start from horizontally (positive = starts to the right, negative = starts to the left). Settles to 0. */
@@ -19,9 +20,6 @@ interface ScrollRevealImageProps extends Omit<HTMLMotionProps<"img">, "style" | 
   className?: string;
   wrapperClassName?: string;
 }
-
-// Matches AOS's default easing (CSS "ease"), same as Reveal.tsx/AnimatedHeading.
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /**
  * ONE-TIME entrance reveal + ONGOING ambient drift, layered on separate
@@ -43,6 +41,9 @@ const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0
  * fast scroll. This version separates "arrive once" (time-based) from
  * "drift while present" (scroll-based) instead.
  *
+ * Visitors who ask for reduced motion get no drift (the image stays put); the
+ * entrance's movement is skipped by the site-wide MotionConfig, leaving a fade.
+ *
  * NOTE on props typing: this extends framer-motion's own `HTMLMotionProps<"img">`
  * rather than React's `ImgHTMLAttributes<HTMLImageElement>` — the two disagree
  * on several event handler signatures (e.g. onAnimationStart), so spreading
@@ -60,6 +61,7 @@ export default function ScrollRevealImage({
   ...imageProps
 }: ScrollRevealImageProps) {
   const { ref, inView } = useAosReveal<HTMLDivElement>({ offset: 150 });
+  const prefersReducedMotion = useReducedMotion();
 
   // Continuous drift, tracked against the SAME element the entrance trigger
   // measures — both hooks just read getBoundingClientRect from it, so one
@@ -87,7 +89,11 @@ export default function ScrollRevealImage({
               }
         }
       >
-        <motion.img {...imageProps} style={{ x: driftX, willChange: "transform" }} className={className} />
+        <motion.img
+          {...imageProps}
+          style={prefersReducedMotion ? undefined : { x: driftX, willChange: "transform" }}
+          className={className}
+        />
       </motion.div>
     </div>
   );

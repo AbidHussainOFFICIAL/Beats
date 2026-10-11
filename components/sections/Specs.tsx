@@ -1,5 +1,6 @@
 "use client";
 
+import { AOS_DEFAULT_EASE } from "@/lib/motion";
 import { motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
@@ -9,9 +10,6 @@ import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { specs } from "@/lib/data";
 
 const SPECS_LETTERS = ["S", "p", "e", "c", "s"];
-
-// Matches AOS's default easing (CSS "ease"), same as Reveal.tsx/AnimatedHeading.
-const AOS_DEFAULT_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1.0];
 
 /**
  * Two body layouts under the shared heading, chosen at the `sm` (640px)

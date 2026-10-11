@@ -9,6 +9,7 @@ import {
   MicrophoneIcon,
   TwitterIcon,
 } from "@/components/icons";
+import { catalog, discountPercent, formatNaira } from "@/lib/catalog";
 
 // Absolute ("/#...") hrefs so these work from every page, not just the
 // landing page. On the landing page LenisProvider still smooth-scrolls them.
@@ -36,21 +37,31 @@ export const specs: Spec[] = [
 ];
 
 export interface Product {
-  /** matches the product's slug in lib/catalog.ts (its page is /products/<slug>) */
+  /** the product's slug in lib/catalog.ts (its page is /products/<slug>) */
   slug: string;
   name: string;
+  /** Current (sale) price label, e.g. "N299K". */
   price: string;
+  /** Original price label, e.g. "N399K" — empty when the product isn't on sale. */
+  compareAt: string;
   image: string;
   delay: number;
 }
 
-export const products: Product[] = [
-  { slug: "black", name: "Black", price: "N299K", image: "/images/content/headphone-1.png", delay: 0 },
-  { slug: "red-black", name: "Red Black", price: "N299K", image: "/images/content/headphone-2.png", delay: 100 },
-  { slug: "blue", name: "Blue", price: "N299K", image: "/images/content/headphone-3.png", delay: 200 },
-  { slug: "twilight-grey", name: "Twilight Grey", price: "N299K", image: "/images/content/headphone-4.png", delay: 300 },
-  { slug: "night-black", name: "Night Black", price: "N299K", image: "/images/content/headphone-5.png", delay: 400 },
-];
+/**
+ * The headphone cards on the landing page. Built from the catalog, so names,
+ * prices and images live in one place (lib/catalog.ts) and can't drift apart.
+ */
+export const products: Product[] = catalog
+  .filter((product) => product.kind === "headphones")
+  .map((product, index) => ({
+    slug: product.slug,
+    name: product.name,
+    price: formatNaira(product.price, true),
+    compareAt: discountPercent(product) > 0 ? formatNaira(product.compareAtPrice, true) : "",
+    image: product.image,
+    delay: index * 100,
+  }));
 
 export const brandLogos = [
   { name: "apple", src: "/images/brands/apple.png", delay: 0 },

@@ -7,6 +7,7 @@ import ParallaxImage from "@/components/ui/ParallaxImage";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { BagIcon } from "@/components/icons";
+import { MAX_DISCOUNT_PERCENT } from "@/lib/catalog";
 
 /**
  * Buy Now button — same tap-feedback pattern established throughout this
@@ -104,7 +105,7 @@ export default function PromoBanner() {
               </span>
             </h3>
             <p className="text-sm md:text-base font-light text-[#BDC0C2] my-3 transition-text">
-              Buy Now, up to 40% off.
+              Buy Now, up to {MAX_DISCOUNT_PERCENT}% off.
             </p>
             <div>
               <Reveal variant="zoom-in" duration={700} delay={50} offset={300}>
