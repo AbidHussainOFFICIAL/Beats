@@ -10,6 +10,10 @@
  * discounts (MAX_DISCOUNT_PERCENT), so it can never claim more than is true.
  */
 
+/** The store's currency: Pakistani rupees. The symbol is what shoppers see; the code is for structured data. */
+export const CURRENCY_CODE = "PKR";
+const CURRENCY_SYMBOL = "Rs";
+
 /** Most units of one item a single bag line can hold. */
 export const MAX_QUANTITY = 10;
 
@@ -24,7 +28,7 @@ export interface CatalogProduct {
   name: string;
   /** Full display name, e.g. "Beats 3 Black". */
   title: string;
-  /** Current unit price in naira (the sale price). */
+  /** Current unit price in rupees (the sale price). */
   price: number;
   /** The original price before the sale. Equal to `price` when not on sale. */
   compareAtPrice: number;
@@ -40,8 +44,8 @@ export interface CatalogProduct {
   box: string[];
 }
 
-const HEADPHONE_PRICE = 299000;
-const HEADPHONE_COMPARE_AT_PRICE = 399000;
+const HEADPHONE_PRICE = 90000;
+const HEADPHONE_COMPARE_AT_PRICE = 120000;
 
 const HEADPHONE_DESCRIPTION =
   "Enjoy award-winning Beats sound with wireless listening freedom and a sleek, streamlined design with comfortable padded earphones, delivering first-rate playback.";
@@ -131,8 +135,8 @@ export const catalog: CatalogProduct[] = [
     family: "Accessories",
     name: "Case",
     title: "Beats 3 Case",
-    price: 42000,
-    compareAtPrice: 70000,
+    price: 15000,
+    compareAtPrice: 25000,
     image: "/images/content/case-headphone-case-bkg.png",
     gallery: ["/images/content/case-headphone-case-bkg.png"],
     swatch: "#1A1A1C",
@@ -168,10 +172,14 @@ export function getRelatedProducts(slug: string, count: number): CatalogProduct[
   return catalog.filter((product) => product.slug !== slug).slice(0, count);
 }
 
-/** "N299K" when `short` and the amount is a whole number of thousands, else "N299,000". */
-export function formatNaira(amount: number, short = false): string {
-  if (short && amount >= 1000 && amount % 1000 === 0) return `N${amount / 1000}K`;
-  return `N${amount.toLocaleString("en-US")}`;
+/**
+ * A price as shoppers see it: "Rs 90,000", or "Rs 90K" when `short` and the
+ * amount is a whole number of thousands (the landing page's compact style).
+ * The space after "Rs" is non-breaking so a price never wraps in the middle.
+ */
+export function formatPrice(amount: number, short = false): string {
+  if (short && amount >= 1000 && amount % 1000 === 0) return `${CURRENCY_SYMBOL}\u00a0${amount / 1000}K`;
+  return `${CURRENCY_SYMBOL}\u00a0${amount.toLocaleString("en-US")}`;
 }
 
 // --- Delivery -------------------------------------------------------------
@@ -187,19 +195,19 @@ export interface ShippingMethod {
 }
 
 /** Standard delivery is free once the bag reaches this subtotal. */
-export const FREE_STANDARD_SHIPPING_FROM = 500000;
+export const FREE_STANDARD_SHIPPING_FROM = 150000;
 
 const STANDARD_SHIPPING: ShippingMethod = {
   id: "standard",
   label: "Standard delivery",
   minDays: 3,
   maxDays: 5,
-  fee: 5000,
+  fee: 500,
 };
 
 export const SHIPPING_METHODS: ShippingMethod[] = [
   STANDARD_SHIPPING,
-  { id: "express", label: "Express delivery", minDays: 1, maxDays: 2, fee: 12000 },
+  { id: "express", label: "Express delivery", minDays: 1, maxDays: 2, fee: 1500 },
 ];
 
 export function getShippingMethod(id: ShippingMethodId): ShippingMethod {

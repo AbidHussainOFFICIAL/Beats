@@ -18,7 +18,7 @@ import { BagIcon } from "@/components/icons";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { usePressedState } from "@/lib/hooks/usePressedState";
 import { HERO_MOBILE_RUNWAY_HEIGHT_SVH, HERO_RUNWAY_HEIGHT_VH } from "@/lib/constants";
-import { formatNaira, getProduct } from "@/lib/catalog";
+import { formatPrice, getProduct } from "@/lib/catalog";
 
 /**
  * Layouts, chosen in `Hero` at the bottom — only the one that applies is
@@ -61,7 +61,7 @@ import { formatNaira, getProduct } from "@/lib/catalog";
 /** The hero product: where its "Add to Bag" button goes (to choose a color) and which price it shows. */
 const HERO_PRODUCT_SLUG = "black";
 const HERO_PRODUCT_HREF = `/products/${HERO_PRODUCT_SLUG}`;
-const HERO_PRICE_LABEL = formatNaira(getProduct(HERO_PRODUCT_SLUG)?.price ?? 0, true);
+const HERO_PRICE_LABEL = formatPrice(getProduct(HERO_PRODUCT_SLUG)?.price ?? 0, true);
 
 const HERO_DESCRIPTION = getProduct(HERO_PRODUCT_SLUG)?.description ?? "";
 

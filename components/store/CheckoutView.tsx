@@ -17,7 +17,7 @@ import EmptyState from "@/components/store/EmptyState";
 import { useCart } from "@/components/providers/CartProvider";
 import {
   SHIPPING_METHODS,
-  formatNaira,
+  formatPrice,
   getShippingMethod,
   shippingFee,
 } from "@/lib/catalog";
@@ -32,7 +32,7 @@ const checkoutSchema = z.object({
     .regex(/^\+?[\d\s-]{7,}$/, "Enter a valid phone number"),
   street: z.string().trim().min(5, "Enter your street address"),
   city: z.string().trim().min(2, "Enter your city"),
-  state: z.string().trim().min(2, "Enter your state"),
+  state: z.string().trim().min(2, "Enter your province"),
   delivery: z.enum(["standard", "express"]),
 });
 
@@ -131,7 +131,7 @@ export default function CheckoutView() {
                   <FormField
                     label="Full name"
                     autoComplete="name"
-                    placeholder="Ada Okafor"
+                    placeholder="Ayesha Khan"
                     error={errors.fullName?.message}
                     {...register("fullName")}
                   />
@@ -148,7 +148,7 @@ export default function CheckoutView() {
                   label="Phone"
                   type="tel"
                   autoComplete="tel"
-                  placeholder="+234 801 234 5678"
+                  placeholder="+92 300 1234567"
                   error={errors.phone?.message}
                   {...register("phone")}
                 />
@@ -161,7 +161,7 @@ export default function CheckoutView() {
                   <FormField
                     label="Street address"
                     autoComplete="street-address"
-                    placeholder="12 Admiralty Way"
+                    placeholder="House 12, Street 5, Gulberg"
                     error={errors.street?.message}
                     {...register("street")}
                   />
@@ -169,14 +169,14 @@ export default function CheckoutView() {
                 <FormField
                   label="City"
                   autoComplete="address-level2"
-                  placeholder="Lagos"
+                  placeholder="Lahore"
                   error={errors.city?.message}
                   {...register("city")}
                 />
                 <FormField
-                  label="State"
+                  label="Province"
                   autoComplete="address-level1"
-                  placeholder="Lagos State"
+                  placeholder="Punjab"
                   error={errors.state?.message}
                   {...register("state")}
                 />
@@ -198,7 +198,7 @@ export default function CheckoutView() {
                             Arrives <DeliveryWindow minDays={method.minDays} maxDays={method.maxDays} />
                           </p>
                         </div>
-                        <p className="shrink-0 text-sm font-semibold">{fee === 0 ? "Free" : formatNaira(fee)}</p>
+                        <p className="shrink-0 text-sm font-semibold">{fee === 0 ? "Free" : formatPrice(fee)}</p>
                       </div>
                     </label>
                   );
@@ -222,7 +222,7 @@ export default function CheckoutView() {
                     <p className="truncate text-sm font-semibold">{product.title}</p>
                     <p className="text-[0.8125rem] font-light text-[#BDC0C2]">Qty {quantity}</p>
                   </div>
-                  <p className="shrink-0 text-sm font-semibold">{formatNaira(product.price * quantity)}</p>
+                  <p className="shrink-0 text-sm font-semibold">{formatPrice(product.price * quantity)}</p>
                 </li>
               ))}
             </ul>
@@ -230,23 +230,23 @@ export default function CheckoutView() {
             <dl className="mt-3 space-y-3 border-t border-[#232325] pt-4 text-sm">
               <div className="flex items-center justify-between">
                 <dt className="font-light text-[#BDC0C2]">Subtotal</dt>
-                <dd className="font-semibold">{formatNaira(subtotal)}</dd>
+                <dd className="font-semibold">{formatPrice(subtotal)}</dd>
               </div>
               {savings > 0 && (
                 <div className="flex items-center justify-between">
                   <dt className="font-light text-[#BDC0C2]">You&apos;re saving</dt>
-                  <dd className="font-semibold">{formatNaira(savings)}</dd>
+                  <dd className="font-semibold">{formatPrice(savings)}</dd>
                 </div>
               )}
               <div className="flex items-center justify-between">
                 <dt className="font-light text-[#BDC0C2]">Shipping</dt>
-                <dd className="font-semibold">{shipping === 0 ? "Free" : formatNaira(shipping)}</dd>
+                <dd className="font-semibold">{shipping === 0 ? "Free" : formatPrice(shipping)}</dd>
               </div>
             </dl>
 
             <div className="mt-4 flex items-center justify-between border-t border-[#2A2A2E] pt-4">
               <p className="text-base font-semibold">Total</p>
-              <p className="text-lg font-semibold">{formatNaira(total)}</p>
+              <p className="text-lg font-semibold">{formatPrice(total)}</p>
             </div>
 
             <ActionButton type="submit" variant="light" disabled={isSubmitting} className="mt-5 w-full">

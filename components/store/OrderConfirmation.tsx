@@ -12,7 +12,7 @@ import DemoNotice from "@/components/ui/DemoNotice";
 import EmptyState from "@/components/store/EmptyState";
 import { CheckCircleIcon } from "@/components/icons/store";
 import { useCart } from "@/components/providers/CartProvider";
-import { deliveryWindowLabel, formatNaira } from "@/lib/catalog";
+import { deliveryWindowLabel, formatPrice } from "@/lib/catalog";
 
 /** A label/value pair inside the confirmation's detail cards. */
 function Detail({ label, children }: { label: string; children: ReactNode }) {
@@ -103,7 +103,7 @@ export default function OrderConfirmation() {
                   <p className="truncate text-sm font-semibold">{line.title}</p>
                   <p className="text-[0.8125rem] font-light text-[#BDC0C2]">Qty {line.quantity}</p>
                 </div>
-                <p className="shrink-0 text-sm font-semibold">{formatNaira(line.price * line.quantity)}</p>
+                <p className="shrink-0 text-sm font-semibold">{formatPrice(line.price * line.quantity)}</p>
               </li>
             ))}
           </ul>
@@ -111,22 +111,22 @@ export default function OrderConfirmation() {
           <dl className="mt-3 space-y-3 border-t border-[#232325] pt-4 text-sm">
             <div className="flex items-center justify-between">
               <dt className="font-light text-[#BDC0C2]">Subtotal</dt>
-              <dd className="font-semibold">{formatNaira(order.subtotal)}</dd>
+              <dd className="font-semibold">{formatPrice(order.subtotal)}</dd>
             </div>
             {(order.savings ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <dt className="font-light text-[#BDC0C2]">You saved</dt>
-                <dd className="font-semibold">{formatNaira(order.savings ?? 0)}</dd>
+                <dd className="font-semibold">{formatPrice(order.savings ?? 0)}</dd>
               </div>
             )}
             <div className="flex items-center justify-between">
               <dt className="font-light text-[#BDC0C2]">{order.deliveryLabel}</dt>
-              <dd className="font-semibold">{order.shipping === 0 ? "Free" : formatNaira(order.shipping)}</dd>
+              <dd className="font-semibold">{order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</dd>
             </div>
           </dl>
           <div className="mt-4 flex items-center justify-between border-t border-[#2A2A2E] pt-4">
             <p className="text-base font-semibold">Total</p>
-            <p className="text-lg font-semibold">{formatNaira(order.total)}</p>
+            <p className="text-lg font-semibold">{formatPrice(order.total)}</p>
           </div>
         </Reveal>
 

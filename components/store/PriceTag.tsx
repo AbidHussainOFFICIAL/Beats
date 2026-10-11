@@ -1,4 +1,4 @@
-import { discountPercent, formatNaira, type CatalogProduct } from "@/lib/catalog";
+import { discountPercent, formatPrice, type CatalogProduct } from "@/lib/catalog";
 
 const SIZES = {
   sm: { price: "text-xs", original: "text-[0.6875rem]" },
@@ -11,8 +11,8 @@ const SIZES = {
  * struck-through original price and a "-25%" badge. Screen readers hear
  * "Was …" and "… off" instead of just the bare numbers.
  *
- * `short` writes whole-thousand amounts as "N299K" (the landing page's style)
- * instead of "N299,000".
+ * `short` writes whole-thousand amounts as "Rs 90K" (the landing page's style)
+ * instead of "Rs 90,000".
  */
 export default function PriceTag({
   product,
@@ -28,12 +28,12 @@ export default function PriceTag({
 
   return (
     <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-      <span className={`font-semibold ${classes.price}`}>{formatNaira(product.price, short)}</span>
+      <span className={`font-semibold ${classes.price}`}>{formatPrice(product.price, short)}</span>
       {percent > 0 && (
         <>
           <del className={`font-light text-[#8E9296] ${classes.original}`}>
             <span className="sr-only">Was </span>
-            {formatNaira(product.compareAtPrice, short)}
+            {formatPrice(product.compareAtPrice, short)}
           </del>
           <span className="rounded bg-white px-1.5 py-0.5 text-[0.6875rem] font-semibold leading-none text-black">
             -{percent}%<span className="sr-only"> off</span>

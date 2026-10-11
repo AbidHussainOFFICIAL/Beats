@@ -11,7 +11,7 @@ import { CloseIcon } from "@/components/icons";
 import { TrashIcon } from "@/components/icons/store";
 import { useCart } from "@/components/providers/CartProvider";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
-import { formatNaira } from "@/lib/catalog";
+import { formatPrice } from "@/lib/catalog";
 
 /**
  * The desktop mini-bag flyout, anchored under the header at the right. It
@@ -119,7 +119,7 @@ export default function MiniBag() {
                       </div>
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <QuantityStepper size="sm" value={quantity} onChange={(next) => setQuantity(product.slug, next)} />
-                        <p className="text-sm font-semibold">{formatNaira(product.price * quantity)}</p>
+                        <p className="text-sm font-semibold">{formatPrice(product.price * quantity)}</p>
                       </div>
                     </div>
                   </li>
@@ -128,7 +128,7 @@ export default function MiniBag() {
 
               <div className="mt-4 flex items-center justify-between border-t border-[#232325] pt-4">
                 <p className="text-sm font-light text-[#BDC0C2]">Subtotal</p>
-                <p className="text-base font-semibold">{formatNaira(subtotal)}</p>
+                <p className="text-base font-semibold">{formatPrice(subtotal)}</p>
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3">

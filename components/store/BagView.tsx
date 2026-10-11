@@ -13,7 +13,7 @@ import EmptyState from "@/components/store/EmptyState";
 import PriceTag from "@/components/store/PriceTag";
 import { TrashIcon } from "@/components/icons/store";
 import { useCart, type CartLine } from "@/components/providers/CartProvider";
-import { FREE_STANDARD_SHIPPING_FROM, formatNaira } from "@/lib/catalog";
+import { FREE_STANDARD_SHIPPING_FROM, formatPrice } from "@/lib/catalog";
 
 function BagLine({
   line,
@@ -61,7 +61,7 @@ function BagLine({
                 <PriceTag product={product} size="sm" />
               </div>
             </div>
-            <p className="shrink-0 text-base font-semibold">{formatNaira(product.price * quantity)}</p>
+            <p className="shrink-0 text-base font-semibold">{formatPrice(product.price * quantity)}</p>
           </div>
 
           <div className="mt-auto flex items-center justify-between pt-3">
@@ -135,12 +135,12 @@ export default function BagView() {
                 <dt className="font-light text-[#BDC0C2]">
                   Subtotal ({count} {count === 1 ? "item" : "items"})
                 </dt>
-                <dd className="font-semibold">{formatNaira(subtotal)}</dd>
+                <dd className="font-semibold">{formatPrice(subtotal)}</dd>
               </div>
               {savings > 0 && (
                 <div className="flex items-center justify-between">
                   <dt className="font-light text-[#BDC0C2]">You&apos;re saving</dt>
-                  <dd className="font-semibold">{formatNaira(savings)}</dd>
+                  <dd className="font-semibold">{formatPrice(savings)}</dd>
                 </div>
               )}
               <div className="flex items-center justify-between">
@@ -152,7 +152,7 @@ export default function BagView() {
             <div className="mt-5">
               <p className="text-[0.8125rem] font-light leading-5 text-[#BDC0C2]">
                 {remainingForFreeShipping > 0
-                  ? `Add ${formatNaira(remainingForFreeShipping)} more for free standard delivery.`
+                  ? `Add ${formatPrice(remainingForFreeShipping)} more for free standard delivery.`
                   : "You've unlocked free standard delivery."}
               </p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#2A2A2E]">
@@ -167,7 +167,7 @@ export default function BagView() {
 
             <div className="mt-5 flex items-center justify-between border-t border-[#2A2A2E] pt-5">
               <p className="text-base font-semibold">Total</p>
-              <p className="text-lg font-semibold">{formatNaira(subtotal)}</p>
+              <p className="text-lg font-semibold">{formatPrice(subtotal)}</p>
             </div>
             <p className="mt-1 text-[0.75rem] font-light text-[#8E9296]">Before shipping.</p>
 

@@ -4,7 +4,7 @@ import DeliveryWindow from "@/components/store/DeliveryWindow";
 import {
   FREE_STANDARD_SHIPPING_FROM,
   SHIPPING_METHODS,
-  formatNaira,
+  formatPrice,
 } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -27,8 +27,8 @@ export default function ShippingReturnsPage() {
                 Arrives <DeliveryWindow minDays={method.minDays} maxDays={method.maxDays} />
               </p>
               <p>
-                {formatNaira(method.fee)}
-                {method.id === "standard" && `, free on orders over ${formatNaira(FREE_STANDARD_SHIPPING_FROM)}`}
+                {formatPrice(method.fee)}
+                {method.id === "standard" && `, free on orders over ${formatPrice(FREE_STANDARD_SHIPPING_FROM)}`}
               </p>
             </li>
           ))}

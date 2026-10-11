@@ -18,7 +18,7 @@ import { ChevronRightIcon, TruckIcon } from "@/components/icons/store";
 import {
   FREE_STANDARD_SHIPPING_FROM,
   SHIPPING_METHODS,
-  formatNaira,
+  formatPrice,
   getColorVariants,
   getRelatedProducts,
   type CatalogProduct,
@@ -280,8 +280,8 @@ export default function ProductDetail({ product }: { product: CatalogProduct }) 
                       {method.label}: <DeliveryWindow minDays={method.minDays} maxDays={method.maxDays} />
                       <span className="block text-[0.8125rem] text-[#8E9296]">
                         {method.id === "standard"
-                          ? `${formatNaira(method.fee)}, free over ${formatNaira(FREE_STANDARD_SHIPPING_FROM, true)}`
-                          : formatNaira(method.fee)}
+                          ? `${formatPrice(method.fee)}, free over ${formatPrice(FREE_STANDARD_SHIPPING_FROM, true)}`
+                          : formatPrice(method.fee)}
                       </span>
                     </li>
                   ))}

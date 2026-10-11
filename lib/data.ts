@@ -9,7 +9,7 @@ import {
   MicrophoneIcon,
   TwitterIcon,
 } from "@/components/icons";
-import { catalog, discountPercent, formatNaira } from "@/lib/catalog";
+import { catalog, discountPercent, formatPrice } from "@/lib/catalog";
 
 // Absolute ("/#...") hrefs so these work from every page, not just the
 // landing page. On the landing page LenisProvider still smooth-scrolls them.
@@ -40,9 +40,9 @@ export interface Product {
   /** the product's slug in lib/catalog.ts (its page is /products/<slug>) */
   slug: string;
   name: string;
-  /** Current (sale) price label, e.g. "N299K". */
+  /** Current (sale) price label, e.g. "Rs 90K". */
   price: string;
-  /** Original price label, e.g. "N399K" — empty when the product isn't on sale. */
+  /** Original price label, e.g. "Rs 120K" — empty when the product isn't on sale. */
   compareAt: string;
   image: string;
   delay: number;
@@ -57,8 +57,8 @@ export const products: Product[] = catalog
   .map((product, index) => ({
     slug: product.slug,
     name: product.name,
-    price: formatNaira(product.price, true),
-    compareAt: discountPercent(product) > 0 ? formatNaira(product.compareAtPrice, true) : "",
+    price: formatPrice(product.price, true),
+    compareAt: discountPercent(product) > 0 ? formatPrice(product.compareAtPrice, true) : "",
     image: product.image,
     delay: index * 100,
   }));
